@@ -18,7 +18,7 @@ import nl.geospatialAI.beans.StudentRegistration;
 
 public class StudentUpdateController {
 
-@RequestMapping(method = RequestMethod.PUT, value="/update/student")
+@RequestMapping(method = RequestMethod.PUT, value="/geoSpatialAIserver/update/student")
 
 @ResponseBody
 
