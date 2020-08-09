@@ -3,6 +3,8 @@ package nl.geospatialAI.Assessment;
 import java.util.ArrayList;
 import java.util.List;
 
+import nl.geospatialAI.serverGlobals.ServerGlobals;
+
 public class Risk {
 
 	public enum tRiskCategoryType {
@@ -39,10 +41,6 @@ public class Risk {
 		// initialize proofs
 		this.myProofs = new ArrayList<Proof>();
 
-		System.out.println("CREATING RISK [" + this.getRefID() + "]");
-		System.out.println("----------------------------------------");
-		System.out.println();
-
 	}
 
 	public String getPolicyReference() {
@@ -58,7 +56,8 @@ public class Risk {
 
 		// bouwopvlak
 
-		proofBouwopvlak = policyLib.createProof_WITHIN_BOUNDARY_BUILD_SURFACE(Proof.tProofClassificationType.UNDETERMINED);
+		proofBouwopvlak = policyLib
+				.createProof_WITHIN_BOUNDARY_BUILD_SURFACE(Proof.tProofClassificationType.UNDETERMINED);
 		this.addProof(proofHoogte);
 		this.addProof(proofBouwopvlak);
 	}
@@ -117,21 +116,20 @@ public class Risk {
 
 	// Risk Evaluatie methods
 
-	private void evalProofasAND(boolean tRecording, boolean exhaustive) {
+	private void evalProofasAND(ServerGlobals theServerGlobals, boolean exhaustive) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.myProofs.size(); i++) {
-			aProofResult = myProofs.get(i).assessProof(tRecording, 1, exhaustive);
+			aProofResult = myProofs.get(i).assessProof(theServerGlobals, 1, exhaustive);
 
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.proofOverallResult = Proof.tProofClassificationType.NEGATIVE;
 				aValueSet = true;
-				if (tRecording) {
-					System.out.println("Overall impact: evaluatie naar negatief vanwege AND");
-					System.out.println();
-				}
+				theServerGlobals.log("Overall impact: evaluatie naar negatief vanwege AND");
+				theServerGlobals.log("");
+
 			} else if (aProofResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 				// Negative remain Negative : no action
 				// Positive remains positive : no action
@@ -140,10 +138,10 @@ public class Risk {
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (this.aValueSet == false) {
 						// flip undetermined first time to positive
-						if (tRecording) {
-							System.out.println("Overall impact: evaluatie va onbekend naar positief");
-							System.out.println();
-						}
+
+						theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
+						theServerGlobals.log("");
+
 						this.proofOverallResult = Proof.tProofClassificationType.POSITIVE;
 						this.aValueSet = true;
 					}
@@ -155,18 +153,17 @@ public class Risk {
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 					this.proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
 					this.aValueSet = true;
-					if (tRecording) {
-						System.out.println("Overall impact : positief wordt onbekend");
-						System.out.println();
-					}
+
+					theServerGlobals.log("Overall impact : positief wordt onbekend");
+					theServerGlobals.log("");
 
 				}
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (aValueSet == false) {
-						if (tRecording) {
-							System.out.println("Overall impact: fixeer onbekend");
-							System.out.println();
-						}
+
+						theServerGlobals.log("Overall impact: fixeer onbekend");
+						theServerGlobals.log("");
+
 						this.aValueSet = true;
 					}
 
@@ -177,23 +174,22 @@ public class Risk {
 			if ((exhaustive == false) && (proofOverallResult.equals(Proof.tProofClassificationType.NEGATIVE))
 					&& (i < (this.myProofs.size() - 1))) {
 
-				if (tRecording) {
-					System.out.println("Stop voortijdig beoordeling van risico " + this.refID
-							+ ". Een van onderliggende bewijzen zijn negatief en operand is AND");
-				}
+				theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
+						+ ". Een van onderliggende bewijzen zijn negatief en operand is AND");
+
 				break;
 			}
 
 		}
 	}
 
-	private void evalProofasOR(boolean tRecording, boolean exhaustive) {
+	private void evalProofasOR(ServerGlobals theServerGlobals, boolean exhaustive) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.myProofs.size(); i++) {
-			aProofResult = myProofs.get(i).assessProof(tRecording, 1, exhaustive);
+			aProofResult = myProofs.get(i).assessProof(theServerGlobals, 1, exhaustive);
 
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
@@ -204,16 +200,15 @@ public class Risk {
 					aValueSet = true;
 				}
 
-				if (tRecording) {
-					System.out.println("Overall impact: evaluatie van onbekend naar negatief");
-					System.out.println();
-				}
+				theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
+				theServerGlobals.log("");
+
 			} else if (aProofResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 				// Bij OR wordt resultaat POSITIEF: no matter waht the other will be
-				if (tRecording) {
-					System.out.println("Overall impact : evaluatie naar positief vanwege OR");
-					System.out.println();
-				}
+
+				theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
+				theServerGlobals.log("");
+
 				this.proofOverallResult = Proof.tProofClassificationType.POSITIVE;
 				this.aValueSet = true;
 
@@ -223,18 +218,17 @@ public class Risk {
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 					this.proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
 					this.aValueSet = true;
-					if (tRecording) {
-						System.out.println("Overall impact : negatief wordt onbekend");
-						System.out.println();
-					}
+
+					theServerGlobals.log("Overall impact : negatief wordt onbekend");
+					theServerGlobals.log("");
 
 				}
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (aValueSet == false) {
-						if (tRecording) {
-							System.out.println("Overall impact: fixeer onbekend");
-							System.out.println();
-						}
+
+						theServerGlobals.log("Overall impact: fixeer onbekend");
+						theServerGlobals.log("");
+
 						this.aValueSet = true;
 					}
 
@@ -245,17 +239,16 @@ public class Risk {
 			if ((exhaustive == false) && (proofOverallResult.equals(Proof.tProofClassificationType.POSITIVE))
 					&& (i < (this.myProofs.size() - 1))) {
 
-				if (tRecording) {
-					System.out.println("Stop voortijdig beoordeling van risico " + this.refID
-							+ ". Een van onderliggende bewijzen is POSITIEF en operand is OR");
-				}
+				theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
+						+ ". Een van onderliggende bewijzen is POSITIEF en operand is OR");
+
 				break;
 			}
 
 		}
 	}
 
-	public void assessRisk(boolean tRecording, boolean exhaustive) {
+	public void assessRisk(ServerGlobals theServerGlobals, boolean exhaustive) {
 
 		// initialize
 		this.proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
@@ -263,28 +256,23 @@ public class Risk {
 		this.aValueSet = false;
 
 		// record start
-		if (tRecording) {
-			System.out.println("");
-			System.out.println("");
-			System.out.println("=================");
-			System.out.println("BEOORDEEL RISICO");
-			System.out.println("=================");
-			System.out.println("Risico: " + this.getDisplayName() + " [id: " + this.refID + "]");
-			System.out.println("Bron: " + this.getPolicyReference());
-			System.out.println("");
 
-		}
+		theServerGlobals.log("");
+		theServerGlobals.log("");
+		theServerGlobals.log("=================");
+		theServerGlobals.log("BEOORDEEL RISICO");
+		theServerGlobals.log("=================");
+		theServerGlobals.log("Risico: " + this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log("Bron: " + this.getPolicyReference());
+		theServerGlobals.log("");
 
 		// Evalueer strategie
 		if (this.getOperand().equals(Risk.tOperandType.AND)) {
-			this.evalProofasAND(tRecording, exhaustive);
+			this.evalProofasAND(theServerGlobals, exhaustive);
 		} else if (this.getOperand().equals(Risk.tOperandType.OR)) {
-			this.evalProofasOR(tRecording, exhaustive);
+			this.evalProofasOR(theServerGlobals, exhaustive);
 		}
 
-		
-		
-		
 		// Evaluate risk value based of overall proofresult
 
 		if (this.proofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
@@ -296,22 +284,19 @@ public class Risk {
 			this.setRiskValue(Risk.tRiskClassificationType.INCREASED);
 		}
 
-		if (tRecording) {
-			System.out.println("");
-			System.out.println("");
-			System.out.println("=================");
-			System.out.println("BEOORDEELD RISICO");
-			System.out.println("=================");
-			System.out.println("Risico: " + this.getDisplayName() + " [id: " + this.refID + "]");
-			System.out.println("Bron: " + this.getPolicyReference());
-			System.out.println("Bewijzen: " + proofOverallResult);
-			System.out.println("Operand: " + this.myOperand);
-			System.out.println("Risico vaststelling: " + this.getRiskValue());
-			System.out.println("=================");
+		theServerGlobals.log("");
+		theServerGlobals.log("");
+		theServerGlobals.log("=================");
+		theServerGlobals.log("BEOORDEELD RISICO");
+		theServerGlobals.log("=================");
+		theServerGlobals.log("Risico: " + this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log("Bron: " + this.getPolicyReference());
+		theServerGlobals.log("Bewijzen: " + proofOverallResult);
+		theServerGlobals.log("Operand: " + this.myOperand);
+		theServerGlobals.log("Risico vaststelling: " + this.getRiskValue());
+		theServerGlobals.log("=================");
 
-			System.out.println("");
-
-		}
+		theServerGlobals.log("");
 
 	}
 

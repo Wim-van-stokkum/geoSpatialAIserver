@@ -1,8 +1,8 @@
 package nl.geospatialAI.Case;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 
 import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Assessment.Risk;
@@ -12,6 +12,7 @@ import nl.geospatialAI.assessObjects.HumanMadeObject;
 import nl.geospatialAI.beans.AssessRequest;
 import nl.geospatialAI.beans.AssessRequestContext;
 import nl.geospatialAI.caseContext.Location;
+import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class Case {
 	static int c_CaseNo = 10000;
@@ -49,7 +50,7 @@ public class Case {
 
 	}
 
-	public void initCaseByRequest(AssessRequest aRequest, boolean recording) {
+	public void initCaseByRequest(AssessRequest aRequest, ServerGlobals theServerGlobals) {
 		AssessRequestContext theContext;
 
 		// copy the request body objects
@@ -71,8 +72,8 @@ public class Case {
 			this.setCaseID( "exploration_session_000" + this.getCaseNo());
 		}
 
-		this.getTheHumanMadeObject().indexDataPoints(this, recording);
-		this.getTheDestinationPane().indexDataPoints(this, recording);
+		this.getTheHumanMadeObject().indexDataPoints(this,theServerGlobals );
+		this.getTheDestinationPane().indexDataPoints(this, theServerGlobals);
 
 	}
 
@@ -149,13 +150,13 @@ public class Case {
 		
 	}
 
-	public void startFirstAssessment(boolean recording) {
+	public void startFirstAssessment(ServerGlobals theServerGlobals) {
         int i;
         Risk aRisk;
         
         for (i = 0 ; i < this.myRisks.size(); i++) {
         	aRisk = this.myRisks.get(i);
-        	aRisk.assessRisk(recording, false);// exhaustive uit
+        	aRisk.assessRisk(theServerGlobals, false);// exhaustive uit
         }
 	
 	}

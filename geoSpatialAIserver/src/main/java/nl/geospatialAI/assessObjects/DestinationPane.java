@@ -5,6 +5,7 @@ import java.util.List;
 
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
+import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 enum destinationPaneType {
 	plot, buildingSite, lot
@@ -56,22 +57,21 @@ public class DestinationPane {
 	}
 
 	
-	public void indexDataPoints(Case theCase, boolean recording) {
+	public void indexDataPoints(Case theCase, ServerGlobals theServerGlobals) {
 		int i;
 		DataPoint aDP;
 
-		if (recording) {
-			System.out.println("Datapoints in DP object (" + this.name + ") : " + this.dataPoints.size());
-		}
+		theServerGlobals.log("Datapoints in HM object (" + this.name + ") : " + this.dataPoints.size());
+
 		for (i = 0; i < this.dataPoints.size(); i++) {
 			aDP = this.dataPoints.get(i);
 			this.myDataPointsByType.put(aDP.getDataPointType(), aDP);
 			this.myDataPointsByID.put(aDP.getDP_refId(), aDP);
 			theCase.index_a_Datapoint(aDP);
-			if (recording) {
-				System.out.println("Registreren DP  datapoint " + aDP.getDataPointType() + " [" + aDP.getDP_refId()
-						+ "] value = " + aDP.getValue());
-			}
+
+			theServerGlobals.log("Registreren HM  datapoint " + aDP.getDataPointType() + " [" + aDP.getDP_refId()
+					+ "] value = " + aDP.getValue());
+
 		}
 
 	}

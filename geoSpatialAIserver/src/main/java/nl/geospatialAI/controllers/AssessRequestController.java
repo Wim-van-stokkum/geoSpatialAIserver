@@ -26,9 +26,10 @@ public class AssessRequestController {
 	@ResponseBody
 
 	public AssessRequestReply registerRequest(@RequestBody AssessRequest aRequest) {
-		boolean recording = true;
+	
 		ServerGlobals theServerGlobals;
 		PolicyLibrary thePolicyLibrary;
+		AssessRequestReply theReply;
 		
         // get globals
 		theServerGlobals = ServerGlobals.getInstance();
@@ -41,30 +42,29 @@ public class AssessRequestController {
 		requestRefID = requestRefID + 1;
 		// log incoming requests
 		AssessRequestDAO.getInstance().add(aRequest);
+		
+		// Create a response for the request
+		theReply = new AssessRequestReply(requestRefID);
+	
+
 
 		// Create case for handling this request
 		newCase = new Case();
 		theServerGlobals.getCaseRegistration().add(newCase);
+		theServerGlobals.log("Creating case [" + newCase.getCaseID() + "] for request : " + requestRefID);
 		
-		if (recording) {
-			System.out.println("Creating case [" + newCase.getCaseID() + "] for request : " + requestRefID);
-		}
-		newCase.initCaseByRequest(aRequest, recording);
+		newCase.initCaseByRequest(aRequest,theServerGlobals );
 		
 		// First Assessment of case
 		newCase.determinePolicyForContext(thePolicyLibrary);
-		newCase.startFirstAssessment(recording);
+		newCase.startFirstAssessment(theServerGlobals);
 
-		// Create a response for the request
-		AssessRequestReply stdregreply = new AssessRequestReply();
-
-		stdregreply.setReferenceID(requestRefID);
 
 		// stdregreply.CreateStubWithQuestions();
 
+         // sent reply
 
-
-		return stdregreply;
+		return theReply;
 
 	}
 

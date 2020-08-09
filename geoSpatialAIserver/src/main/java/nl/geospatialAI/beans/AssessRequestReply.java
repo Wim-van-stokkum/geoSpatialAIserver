@@ -31,8 +31,8 @@ public class AssessRequestReply {
 	public List <AssessmentCriterium> assessmentCriteria;
 	
 	
-    public AssessRequestReply() {
-         // to be defined
+    public AssessRequestReply(int RequestID) {
+         this.setReferenceID(RequestID);
     }
     
     public void CreateStubWithQuestions() {
