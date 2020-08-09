@@ -12,6 +12,7 @@ public class AssessRequestContext {
 		}
 
 
+	
 
    private tScenarioType scenario;
    private String referenceID;

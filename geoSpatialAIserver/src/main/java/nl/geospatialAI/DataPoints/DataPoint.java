@@ -124,9 +124,10 @@ private static int dpRefID = 99 ;
 	
 	
 	public DataPoint() {
-	   	 System.out.println("CREATING DATAPOINT");
+	
 		dpRefID = dpRefID + 1;
 		this.setDP_refId(dpRefID);
+	   	 System.out.println("CREATING DATAPOINT: " + this.getDP_refId());
 	}
 	
 	

@@ -20,7 +20,7 @@ public class AssessRequestReply {
 		
 	}
  
-	private static int replyRefID = 0 ;
+
 	
 
 	public int referenceID;
@@ -32,12 +32,10 @@ public class AssessRequestReply {
 	
 	
     public AssessRequestReply() {
-   	 System.out.println("CREATING STUB FOR ");
-    
-    	CreateStubWithQuestions();
+         // to be defined
     }
     
-    private void CreateStubWithQuestions() {
+    public void CreateStubWithQuestions() {
     	DataPoint dp1;
     	DataPoint dp2;
     	DataPoint dp3;
@@ -71,7 +69,7 @@ public class AssessRequestReply {
         this.additionalDataPointsRequest.add(dp1);
         
         dp2 = new DataPoint();
-        dp2.setQuestionText("Hoeveel parkeerplaatsen worden voorzien?");
+        dp2.setQuestionText("Hoeveel parkeerplaatsen gaat u gebruiken?");
         dp2.setExplanationText("Wij vragen dit om het effect op verkeer in de straat vast te kunnen stellen");
         dp2.setDataPointType(DataPoint.DP_Type.NUMBEROFPARKINGLOTS);
         dp2.setDataType(DataPoint.DP_dataType.INTEGERVALUE);
@@ -124,11 +122,11 @@ public class AssessRequestReply {
         risk1.setPolicyReference("Art 4.5a van Bestemmingsplan");
         this.riskAssessmentResults.add(risk1);
         
-        
-        risk2 = new Risk();
-        risk2.setRiskCategory(Risk.tRiskCategoryType.PURPOSE);
-        risk2.setRiskValue(Risk.tRiskClassificationType.INCREASED);
-        risk2.setDisplayName("Aantasting straatbeeld");
+       
+       risk2 = new Risk();
+       risk2.setRiskCategory(Risk.tRiskCategoryType.PURPOSE);
+       risk2.setRiskValue(Risk.tRiskClassificationType.INCREASED);
+       risk2.setDisplayName("Aantasting straatbeeld");
         risk2.setPolicyReference("Art 12.6a van Beleidskader Gemeente 2020");
         this.riskAssessmentResults.add(risk2);
      
@@ -170,6 +168,9 @@ public class AssessRequestReply {
         
     }
 	
+    
+    
+   
     
     
 	public String getCaseID() {
