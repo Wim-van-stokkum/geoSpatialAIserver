@@ -1,6 +1,10 @@
 package nl.geospatialAI.DataPoints;
 
+import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint.DP_source;
+import nl.geospatialAI.Errorhandling.ErrorReason;
+import nl.geospatialAI.beans.SubmitQuestionsAnswersReply;
+import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class DataPointValue {
 
@@ -27,6 +31,31 @@ public class DataPointValue {
 	}
 	public void setValue(String value) {
 		this.value = value;
+	}
+	
+	public DataPointValue() {
+		System.out.println("CREATING ANSWER FOR ADDITIONAL QUESTION");
+	}
+	public void registerValueSubmitted(ServerGlobals theServerGlobals, Case theCase, SubmitQuestionsAnswersReply theReply) {
+		DataPoint theDataPointSubmitted;
+		ErrorReason anError;
+		String errorString;
+		
+		theDataPointSubmitted = theCase.GetDataPointByID(this.DP_refId);
+	    if (theDataPointSubmitted != null) {
+	    	theDataPointSubmitted.changeValue(this.value,theServerGlobals );
+	    	theDataPointSubmitted.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+	    }
+	    else
+	    {
+	    
+	    	errorString = "No datapoint with id " + this.getDP_refId() + " exists for case " + theCase.getCaseNo();
+	    	anError = ErrorReason.createErrorReason_info(ErrorReason.t_ErrorReasonType.NO_DATAPOINT_EXISTS, errorString);
+	    	theReply.registerErrorReason(anError);
+	    	theServerGlobals.log(errorString);
+	    }
+		
+		
 	}
 
 }

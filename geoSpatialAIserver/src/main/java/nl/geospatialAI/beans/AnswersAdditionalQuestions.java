@@ -2,7 +2,9 @@ package nl.geospatialAI.beans;
 
 import java.util.List;
 
+import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPointValue;
+import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class AnswersAdditionalQuestions {
    	int referenceID;
@@ -20,10 +22,18 @@ public class AnswersAdditionalQuestions {
 	public void setAdditionalDataPoints(List<DataPointValue> additionalDataPoints) {
 		this.additionalDataPoints = additionalDataPoints;
 	}
-   	
-	public AnswersAdditionalQuestions() {
-		System.out.println("CREATING ANSWER FOR ADDITIONAL QUESTION");
+	public void registerValuesSubmitted(ServerGlobals theServerGlobals, Case theCase, SubmitQuestionsAnswersReply theReply) {
+	  int i;
+	  DataPointValue anDataPointValue;
+	  
+	  for (i = 0 ; i < this.additionalDataPoints.size(); i++) {
+		  anDataPointValue = this.additionalDataPoints.get(i);
+		  anDataPointValue.registerValueSubmitted(theServerGlobals, theCase, theReply);
+	  }
+		
 	}
+   	
+	
    	
    	
 }

@@ -2,6 +2,8 @@ package nl.geospatialAI.DataPoints;
 
 import java.util.List;
 
+import nl.geospatialAI.serverGlobals.ServerGlobals;
+
 
 public class DataPoint {
 	
@@ -262,6 +264,21 @@ private static int dpRefID = 99 ;
 	}
 	public void setValues(List<String> values) {
 		this.values = values;
+	}
+
+
+
+
+	public boolean changeValue(String newValue, ServerGlobals theServerGlobals) {
+        boolean ok = true;
+        
+        // TO DO all kind of validation checks
+        
+		theServerGlobals.log("Changing the value for : " + this.getDataPointType()
+		                      + "[" + this.getDP_refId() + "] from " + this.getValue() + " into " +  newValue );
+		this.setValue(newValue);
+		
+		return ok;
 	}
 
 }
