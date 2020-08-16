@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import nl.geospatialAI.Assessment.AssessmentCriterium;
 import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Assessment.Risk;
 import nl.geospatialAI.BIM.BIMfile;
@@ -336,15 +337,58 @@ public class Case {
 
 	public boolean hasBIM() {
 		boolean bimExist;
-		
+
 		bimExist = false;
-		if ( this.theBIMfile != null) {
-			bimExist =  this.theBIMfile.getActive();
+		if (this.theBIMfile != null) {
+			bimExist = this.theBIMfile.getActive();
 		}
 
 		return bimExist;
 	}
 
+	public void evaluateAssessmentCriteria(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
+		// AssessmentCriteria Water
+		
+		this.evaluateAssessmentCriteriaWater(theServerGlobals, theReply);
+	}
 
+	private void evaluateAssessmentCriteriaWater(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
+		// AssessmentCriteria Water
+		AssessmentCriterium waterCriterium;
+		Risk aRisk;
+		int i;
+		boolean ok;
+		int aantalRisk;
+
+		ok = true; // tot tegendeel
+		aantalRisk = 0;
+		waterCriterium = new AssessmentCriterium();
+		waterCriterium.setDisplayName("Beoordeling op water aspecten");
+		waterCriterium.setExemptionRequestAllowed(false);
+		waterCriterium.setCriteriumCategory(AssessmentCriterium.tAssessmentCriteriumCategoryType.WATER);
+
+		for (i = 0; i < this.myRisks.size(); i++) {
+			aRisk = this.myRisks.get(i);
+			if (aRisk.getMyAssessmentCriterium().equals(waterCriterium.getCriteriumCategory())) {
+			    if (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false) {
+			    	aantalRisk = aantalRisk + 1;
+			    }
+				if ((aRisk.getRiskValue().equals(Risk.tRiskClassificationType.NEUTRAL) == false)
+						&& (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false)) {
+					ok = false;
+					
+				}
+			}
+		}
+
+		if (ok && (aantalRisk > 0)) {
+			waterCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.APPROVED);
+		} else if (ok && (aantalRisk == 0)) {
+			waterCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNKNOWN);
+		} else if (ok == false) {
+			waterCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
+		}
+        theReply.addAssessmentCriterium(waterCriterium);
+	}
 
 }

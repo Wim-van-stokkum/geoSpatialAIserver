@@ -63,8 +63,9 @@ public class AssessRequestController {
 			newCase.determinePolicyForContext(thePolicyLibrary,  theReply);
 			newCase.addRisksToReply(theServerGlobals, theReply);
 			newCase.startAssessment(theServerGlobals, theReply);
+			
 		}
-
+		newCase.evaluateAssessmentCriteria(theServerGlobals, theReply);
 
 
 		// stdregreply.CreateStubWithQuestions();

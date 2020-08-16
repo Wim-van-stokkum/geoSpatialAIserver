@@ -40,7 +40,7 @@ public class PolicyLibrary {
 		newRisk.setDisplayName("Risico: Water doorlatendheid");
 
 		newRisk.setPolicyReference("Artikel 12.1, bestemmingsplan oost");
-
+        newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.WATER);
 		myProof = this.createProof_SURFACE_WATER_NON_PERM_ACCEPTABLE(Proof.tProofClassificationType.UNDETERMINED);
 		newRisk.addProof(myProof);
 

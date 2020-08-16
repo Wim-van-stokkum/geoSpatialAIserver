@@ -10,7 +10,8 @@ public enum tAssessmentCriteriumCategoryType {
 	PURPOSE,
 	CONSTRUCTION,
 	ENVIRONMENTAL,
-	LIVING_ENVIRONMENT
+	LIVING_ENVIRONMENT,
+	WATER
 	
 	// to be defined in use case
 }

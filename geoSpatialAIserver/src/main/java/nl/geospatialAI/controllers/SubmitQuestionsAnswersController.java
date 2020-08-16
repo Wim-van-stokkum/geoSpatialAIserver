@@ -58,7 +58,7 @@ public class SubmitQuestionsAnswersController {
 			// Reassess and 
 		
 			correspondingCase.startAssessment(theServerGlobals, theSubmitReply);
-			
+			correspondingCase.evaluateAssessmentCriteria(theServerGlobals, theSubmitReply);
 			
 		}
 

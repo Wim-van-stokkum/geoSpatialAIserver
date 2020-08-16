@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import nl.geospatialAI.Assessment.AssessmentCriterium.tAssessmentCriteriumCategoryType;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
@@ -35,7 +36,19 @@ public class Risk {
 	private List<Proof> myProofs;
 	private boolean aValueSet = false;
 	private Proof.tProofClassificationType proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
+    public String explanation;
+    private tAssessmentCriteriumCategoryType myAssessmentCriterium;
+    
+    
+    
 
+	public tAssessmentCriteriumCategoryType getMyAssessmentCriterium() {
+		return myAssessmentCriterium;
+	}
+
+	public void setMyAssessmentCriterium(tAssessmentCriteriumCategoryType myAssessmentCriterium) {
+		this.myAssessmentCriterium = myAssessmentCriterium;
+	}
 
 	private tOperandType myOperand = Risk.tOperandType.AND;
 
@@ -43,12 +56,29 @@ public class Risk {
 
 		risk_refID = risk_refID + 1;
 		this.setRefID(risk_refID);
+		explanation = "";
 
 		// initialize proofs
 		this.myProofs = new ArrayList<Proof>();
 
 	}
 
+	protected void addToExplanation(String aText) {
+		if (this.explanation.length() == 0) {
+			this.explanation = aText;
+		}
+		else {
+			this.explanation.concat(" " + aText);
+		}
+		
+	}
+
+
+	@JsonIgnore
+	public String explainYourSelf() {
+		return this.explanation;
+	}
+	
 	public String getPolicyReference() {
 		return policyReference;
 	}
@@ -143,7 +173,8 @@ public class Risk {
 		// Proof all underlying proofs
 		for (i = 0; i < this.myProofs.size(); i++) {
 			aProofResult = myProofs.get(i).assessProof(theServerGlobals, theCase, theReply, 1, exhaustive);
-
+			this.addToExplanation(myProofs.get(i).explainYourSelf());
+			
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.proofOverallResult = Proof.tProofClassificationType.NEGATIVE;
 				aValueSet = true;
@@ -210,7 +241,7 @@ public class Risk {
 		// Proof all underlying proofs
 		for (i = 0; i < this.myProofs.size(); i++) {
 			aProofResult = myProofs.get(i).assessProof(theServerGlobals,theCase, theReply, 1, exhaustive);
-
+			this.addToExplanation(myProofs.get(i).explainYourSelf());
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
 				// Negative stays negative

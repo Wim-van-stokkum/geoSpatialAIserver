@@ -40,7 +40,12 @@ public class AssessRequestReply {
          riskAssessmentResults = new ArrayList<Risk>();
      	 myErrorReasons = new ArrayList<ErrorReason>();
      	additionalDataPointsRequest = new ArrayList<DataPoint>();
+        this.assessmentCriteria = new ArrayList<AssessmentCriterium>();
     	this.assessmentStatus= AssessRequestReply.assessmentStatusType.ASSESSING;
+    }
+    
+    public void addAssessmentCriterium(AssessmentCriterium anCriterium) {
+    	this.assessmentCriteria.add(anCriterium);
     }
     
     public void CreateStubWithQuestions() {

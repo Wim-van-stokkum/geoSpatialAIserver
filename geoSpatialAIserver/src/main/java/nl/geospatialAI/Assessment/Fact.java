@@ -3,6 +3,8 @@ package nl.geospatialAI.Assessment;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.beans.AssessRequestReply;
@@ -41,6 +43,7 @@ public class Fact {
 	protected Fact.tFactClassificationType subFactsOverallResult =  Fact.tFactClassificationType.UNKNOWN;
 	protected tOperandType myOperand = Fact.tOperandType.AND;
 	protected List<DataPoint> usedDataPoints;
+	protected String explanation;
 	
 	public Fact() {
 
@@ -50,6 +53,7 @@ public class Fact {
 		this.mySubFacts = new ArrayList<Fact>();
 
 		this.usedDataPoints = new ArrayList<DataPoint>();
+		explanation = "";
 
 		System.out.println("CREATING FACT [" + this.getRefID() + "]");
 		System.out.println("----------------------------------------");
@@ -97,7 +101,23 @@ public class Fact {
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
+	
+	protected void addToExplanation(String aText) {
+		if (this.explanation.length() == 0) {
+			this.explanation = aText;
+		}
+		else {
+			this.explanation.concat(" " + aText);
+		}
+		
+	}
 
+
+	@JsonIgnore
+	public String explainYourSelf() {
+		return this.explanation;
+	}
+	
 	public tFactClassificationType getDefaultFactResult() {
 		return defaultFactResult;
 	}

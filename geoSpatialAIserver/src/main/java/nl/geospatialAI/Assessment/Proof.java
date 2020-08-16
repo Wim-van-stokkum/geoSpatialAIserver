@@ -3,6 +3,8 @@ package nl.geospatialAI.Assessment;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
@@ -46,6 +48,7 @@ public class Proof {
 
 	private List<Proof> mySubProofs;
 	private List<Fact> myFacts;
+	protected String explanation;
 
 	private boolean aValueSet = false;
 	private Proof.tProofClassificationType subProofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
@@ -57,6 +60,22 @@ public class Proof {
 		return proofCategory;
 	}
 
+	protected void addToExplanation(String aText) {
+		if (this.explanation.length() == 0) {
+			this.explanation = aText;
+		}
+		else {
+			this.explanation.concat(" " + aText);
+		}
+		
+	}
+
+
+	@JsonIgnore
+	public String explainYourSelf() {
+		return this.explanation;
+	}
+	
 	public void setProofCategory(tProofCategoryType proofCategory) {
 		this.proofCategory = proofCategory;
 	}
@@ -84,7 +103,8 @@ public class Proof {
 
 		this.mySubProofs = new ArrayList<Proof>();
 		this.myFacts = new ArrayList<Fact>();
-
+        this.explanation = "";
+		
 		System.out.println("CREATING PROOF [" + this.getRefID() + "]");
 		System.out.println("----------------------------------------");
 		System.out.println();
@@ -145,6 +165,7 @@ public class Proof {
 		if (this.myFacts.size() > 0) {
 			resultFacts = this.AssessFacts(theServerGlobals, theCase, theReply,  level, exhaustive);
 			theServerGlobals.log("RECEIVING RESULTFACTS " +resultFacts )  ;
+		
 		}
 
 		// to do overall conclusions over sub proofs and facts
@@ -286,7 +307,8 @@ public class Proof {
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
 			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply,level, exhaustive);
-
+			this.addToExplanation(mySubProofs.get(i).explainYourSelf());
+			
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.subProofOverallResult = Proof.tProofClassificationType.NEGATIVE;
 				aValueSet = true;
@@ -354,7 +376,8 @@ public class Proof {
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
 			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply, level, exhaustive);
-
+			this.addToExplanation(mySubProofs.get(i).explainYourSelf());
+			
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
 				// Negative stays negative
@@ -425,6 +448,7 @@ public class Proof {
 		for (i = 0; i < this.myFacts.size(); i++) {
 			aFactResult = myFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
 			theServerGlobals.log("Na Aanroep AssessFact" + aFactResult);
+			this.addToExplanation(myFacts.get(i).explainYourSelf());
 			
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				this.subFactOverallResult = Fact.tFactClassificationType.FALSE;
@@ -493,7 +517,8 @@ public class Proof {
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
 			aFactResult = this.myFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
-
+			this.addToExplanation(myFacts.get(i).explainYourSelf());
+			
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				// Positive stay positive
 				// Negative stays negative

@@ -1,5 +1,8 @@
 package nl.geospatialAI.Assessment.FactBase;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import nl.geospatialAI.Assessment.Fact;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
@@ -24,6 +27,14 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
         }
 	}
 
+	private  double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+
+	    BigDecimal bd = BigDecimal.valueOf(value);
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
+	}
+	
 	private void evaluateNoBIM(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level,
 			boolean exhaustive) {
 		DataPoint dp_SurfPane;
@@ -33,6 +44,7 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 		double surfPaneValue;
 		double norm;
 		double percNonPerm;
+		double percNonPerm_afgerond;
 
 		norm = 25.0;
 
@@ -52,16 +64,19 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 				surfNonPermValue = dp_SurfTotalNonPerm.getConvertedValueDouble();
 				percNonPerm = (surfNonPermValue / surfPaneValue);
 				theServerGlobals.log("CALC PERC NON PERM: " + percNonPerm + "% kleiner : " + ((100.0 - norm) / 100.0));
-
+				percNonPerm_afgerond = this.round((percNonPerm * 100), 2);
 				if (percNonPerm <= ((100.0 - norm) / 100.0)) {
 					this.setFactResult(Fact.tFactClassificationType.TRUE);
+					this.addToExplanation("OK: Percentage aandeel niet watertoelatend deel perceel [" + (percNonPerm_afgerond )+  "%] ligt binnen de norm van "+ (100- norm) +  "%.");
 				} else {
 					this.setFactResult(Fact.tFactClassificationType.FALSE);
+					this.addToExplanation("NIET OK: Percentage aandeel niet watertoelatend deel perceel [" + (percNonPerm_afgerond )+  "%] ligt boven de norm van "+ (100- norm) +  "%.");
 				}
 
 			}
 		}
+		
+		
 	}
-	
 	
 }
