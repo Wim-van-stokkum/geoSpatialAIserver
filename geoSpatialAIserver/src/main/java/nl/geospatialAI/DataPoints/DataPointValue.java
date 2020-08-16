@@ -3,7 +3,7 @@ package nl.geospatialAI.DataPoints;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint.DP_source;
 import nl.geospatialAI.Errorhandling.ErrorReason;
-import nl.geospatialAI.beans.SubmitQuestionsAnswersReply;
+import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class DataPointValue {
@@ -36,7 +36,7 @@ public class DataPointValue {
 	public DataPointValue() {
 		System.out.println("CREATING ANSWER FOR ADDITIONAL QUESTION");
 	}
-	public void registerValueSubmitted(ServerGlobals theServerGlobals, Case theCase, SubmitQuestionsAnswersReply theReply) {
+	public void registerValueSubmitted(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply) {
 		DataPoint theDataPointSubmitted;
 		ErrorReason anError;
 		String errorString;

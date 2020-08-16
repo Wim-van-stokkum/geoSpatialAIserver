@@ -5,26 +5,28 @@ import java.util.List;
 
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
+import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
-enum humanMadeObjectType {
-	// detail level 0
-	buildingConstruction,
-
-	// detail level 1
-	building,
-
-	// detail level 2
-	mainBuilding, outBuilding,
-
-	// detail level 3
-	commercialBuilding, tradeBuilding, cateringBuilding, officeBuilding, house, residentialBuilding
-
-}
-
 public class HumanMadeObject {
+
+	public enum tHumanMadeObjectType {
+		// detail level 0
+		buildingConstruction,
+
+		// detail level 1
+		building,
+
+		// detail level 2
+		mainBuilding, outBuilding,
+
+		// detail level 3
+		commercialBuilding, tradeBuilding, cateringBuilding, officeBuilding, house, residentialBuilding
+
+	}
+
 	private Case myCase;
-	humanMadeObjectType theHumanMadeObjectType;
+	tHumanMadeObjectType theHumanMadeObjectType;
 	int refId;
 	String name;
 	public List<DataPoint> dataPoints;
@@ -45,11 +47,11 @@ public class HumanMadeObject {
 		this.myCase = myCase;
 	}
 
-	public humanMadeObjectType getTheHumanMadeObjectType() {
+	public tHumanMadeObjectType getTheHumanMadeObjectType() {
 		return theHumanMadeObjectType;
 	}
 
-	public void setTheHumanMadeObjectType(humanMadeObjectType theHumanMadeObjectType) {
+	public void setTheHumanMadeObjectType(tHumanMadeObjectType theHumanMadeObjectType) {
 		this.theHumanMadeObjectType = theHumanMadeObjectType;
 	}
 
@@ -80,7 +82,8 @@ public class HumanMadeObject {
 			this.myDataPointsByType.put(aDP.getDataPointType(), aDP);
 			this.myDataPointsByID.put(aDP.getDP_refId(), aDP);
 			theCase.index_a_Datapoint(aDP);
-
+			aDP.setStatus(DataPoint.DP_Status.PROVIDED);
+			aDP.initDataPoint(aDP.getDataPointType());
 			theServerGlobals.log("Registreren HM  datapoint " + aDP.getDataPointType() + " [" + aDP.getDP_refId()
 					+ "] value = " + aDP.getValue());
 
@@ -97,6 +100,34 @@ public class HumanMadeObject {
 	public DataPoint GetDataPointByType(DataPoint.DP_Type aDP_Type) {
 
 		return this.myDataPointsByType.get(aDP_Type);
+
+	}
+
+	public void addRequestedDataPoint(DataPoint aDP) {
+		if (this.GetDataPointByType(aDP.getDataPointType()) == null) {
+			this.dataPoints.add(aDP);
+			this.myDataPointsByType.put(aDP.getDataPointType(), aDP);
+			this.myDataPointsByID.put(aDP.getDP_refId(), aDP);
+		}
+
+	}
+
+	public void requestMissingAnswers(ServerGlobals theServerGlobals, AssessRequestReply theSubmitReply) {
+		// TODO Auto-generated method stub
+
+		int i;
+		DataPoint aDP;
+
+		for (i = 0; i < this.dataPoints.size(); i++) {
+			aDP = this.dataPoints.get(i);
+			if (aDP.getStatus().equals(DataPoint.DP_Status.REQUESTED)) {
+				if (aDP.isAskable()) {
+					theServerGlobals
+							.log("DataPoint: " + aDP.getDP_refId() + " was not answered, so will request again");
+					theSubmitReply.RequestDataPoint(aDP);
+				}
+			}
+		}
 
 	}
 

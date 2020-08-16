@@ -30,6 +30,7 @@ public class AssessRequestController {
 		ServerGlobals theServerGlobals;
 		PolicyLibrary thePolicyLibrary;
 		AssessRequestReply theReply;
+		boolean BIMfile_statusknown;
 		
         // get globals
 		theServerGlobals = ServerGlobals.getInstance();
@@ -41,10 +42,10 @@ public class AssessRequestController {
 
 		requestRefID = requestRefID + 1;
 		// log incoming requests
-		AssessRequestDAO.getInstance().add(aRequest);
+		// FOR PERFORMANCE CANCELLED : AssessRequestDAO.getInstance().add(aRequest);
 		
 		// Create a response for the request
-		theReply = new AssessRequestReply(requestRefID);
+		theReply = new AssessRequestReply();
 	
 
 
@@ -54,16 +55,23 @@ public class AssessRequestController {
 		theServerGlobals.log("Creating case [" + newCase.getCaseID() + "] for request : " + requestRefID);
 		
 		newCase.initCaseByRequest(aRequest,theServerGlobals );
-		
-		// First Assessment of case
-		newCase.determinePolicyForContext(thePolicyLibrary);
-		newCase.startFirstAssessment(theServerGlobals);
+		theReply.setCaseID(newCase.getCaseID());
+
+		// First Assessment of case, but first check BIM file availability
+		BIMfile_statusknown = newCase.HandleBIMFile(theServerGlobals, newCase, theReply);
+		if (BIMfile_statusknown) {
+			newCase.determinePolicyForContext(thePolicyLibrary,  theReply);
+			newCase.addRisksToReply(theServerGlobals, theReply);
+			newCase.startAssessment(theServerGlobals, theReply);
+		}
+
 
 
 		// stdregreply.CreateStubWithQuestions();
 
          // sent reply
-
+		theReply.setReferenceID(newCase.getCaseNo());
+		theReply.EvalStatus();
 		return theReply;
 
 	}

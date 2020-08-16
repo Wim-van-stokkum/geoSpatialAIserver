@@ -5,6 +5,7 @@ import java.util.List;
 
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
+import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 enum destinationPaneType {
@@ -56,7 +57,6 @@ public class DestinationPane {
 		this.refId = refId;
 	}
 
-	
 	public void indexDataPoints(Case theCase, ServerGlobals theServerGlobals) {
 		int i;
 		DataPoint aDP;
@@ -68,7 +68,8 @@ public class DestinationPane {
 			this.myDataPointsByType.put(aDP.getDataPointType(), aDP);
 			this.myDataPointsByID.put(aDP.getDP_refId(), aDP);
 			theCase.index_a_Datapoint(aDP);
-
+			aDP.setStatus(DataPoint.DP_Status.PROVIDED);
+			aDP.initDataPoint(aDP.getDataPointType());
 			theServerGlobals.log("Registreren HM  datapoint " + aDP.getDataPointType() + " [" + aDP.getDP_refId()
 					+ "] value = " + aDP.getValue());
 
@@ -86,6 +87,33 @@ public class DestinationPane {
 
 		return this.myDataPointsByType.get(aDP_Type);
 
+	}
+
+	public void addRequestedDataPoint(DataPoint aDP) {
+		if(this.GetDataPointByType(aDP.getDataPointType()) == null) {
+			this.dataPoints.add(aDP);
+			this.myDataPointsByType.put(aDP.getDataPointType(), aDP);
+			this.myDataPointsByID.put(aDP.getDP_refId(), aDP);
+		}
+	
+
+	}
+
+	public void requestMissingAnswers(ServerGlobals theServerGlobals, AssessRequestReply theSubmitReply) {
+		// TODO Auto-generated method stub
+		int i;
+		DataPoint aDP;
+
+		for (i = 0; i < this.dataPoints.size(); i++) {
+			aDP = this.dataPoints.get(i);
+			if (aDP.getStatus().equals(DataPoint.DP_Status.REQUESTED)) {
+				if (aDP.isAskable()) {
+					theServerGlobals
+							.log("DataPoint: " + aDP.getDP_refId() + " was not answered but is askable, so will request again");
+					theSubmitReply.RequestDataPoint(aDP);
+				}
+			}
+		}
 	}
 
 }

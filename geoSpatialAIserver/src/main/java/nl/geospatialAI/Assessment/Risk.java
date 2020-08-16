@@ -3,12 +3,16 @@ package nl.geospatialAI.Assessment;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class Risk {
 
 	public enum tRiskCategoryType {
-		CONSTRUCTION, HEALTH, ENVIRONMENTAL, LIVING_ENVIRONMENT, PURPOSE
+		CONSTRUCTION, HEALTH, ENVIRONMENTAL, WATER_PERMABILITY, PURPOSE
 
 		// to be defined in use case
 	}
@@ -31,6 +35,8 @@ public class Risk {
 	private List<Proof> myProofs;
 	private boolean aValueSet = false;
 	private Proof.tProofClassificationType proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
+
+
 	private tOperandType myOperand = Risk.tOperandType.AND;
 
 	public Risk() {
@@ -61,8 +67,22 @@ public class Risk {
 		this.addProof(proofHoogte);
 		this.addProof(proofBouwopvlak);
 	}
+	
+	public void createTestStub2(PolicyLibrary policyLib, Case theCase, AssessRequestReply theReply ) {
+		Proof newProof;
+		Proof proofBouwopvlak;
 
-	public tOperandType getOperand() {
+		
+		newProof = policyLib.createProof_SURFACE_FOUNDATION(Proof.tProofClassificationType.UNDETERMINED);
+         this.addProof(newProof);
+		
+		
+		
+	}
+	
+	
+   @JsonIgnore
+    public tOperandType getOperand() {
 		return myOperand;
 	}
 
@@ -116,13 +136,13 @@ public class Risk {
 
 	// Risk Evaluatie methods
 
-	private void evalProofasAND(ServerGlobals theServerGlobals, boolean exhaustive) {
+	private void evalProofasAND(ServerGlobals theServerGlobals,  Case theCase, AssessRequestReply theReply , boolean exhaustive) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.myProofs.size(); i++) {
-			aProofResult = myProofs.get(i).assessProof(theServerGlobals, 1, exhaustive);
+			aProofResult = myProofs.get(i).assessProof(theServerGlobals, theCase, theReply, 1, exhaustive);
 
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.proofOverallResult = Proof.tProofClassificationType.NEGATIVE;
@@ -183,13 +203,13 @@ public class Risk {
 		}
 	}
 
-	private void evalProofasOR(ServerGlobals theServerGlobals, boolean exhaustive) {
+	private void evalProofasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.myProofs.size(); i++) {
-			aProofResult = myProofs.get(i).assessProof(theServerGlobals, 1, exhaustive);
+			aProofResult = myProofs.get(i).assessProof(theServerGlobals,theCase, theReply, 1, exhaustive);
 
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
@@ -248,7 +268,7 @@ public class Risk {
 		}
 	}
 
-	public void assessRisk(ServerGlobals theServerGlobals, boolean exhaustive) {
+	public void assessRisk(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive) {
 
 		// initialize
 		this.proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
@@ -268,9 +288,9 @@ public class Risk {
 
 		// Evalueer strategie
 		if (this.getOperand().equals(Risk.tOperandType.AND)) {
-			this.evalProofasAND(theServerGlobals, exhaustive);
+			this.evalProofasAND(theServerGlobals, theCase, theReply,  exhaustive);
 		} else if (this.getOperand().equals(Risk.tOperandType.OR)) {
-			this.evalProofasOR(theServerGlobals, exhaustive);
+			this.evalProofasOR(theServerGlobals, theCase, theReply, exhaustive);
 		}
 
 		// Evaluate risk value based of overall proofresult

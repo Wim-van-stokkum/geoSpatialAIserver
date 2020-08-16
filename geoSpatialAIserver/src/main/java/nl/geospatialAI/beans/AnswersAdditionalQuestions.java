@@ -22,7 +22,7 @@ public class AnswersAdditionalQuestions {
 	public void setAdditionalDataPoints(List<DataPointValue> additionalDataPoints) {
 		this.additionalDataPoints = additionalDataPoints;
 	}
-	public void registerValuesSubmitted(ServerGlobals theServerGlobals, Case theCase, SubmitQuestionsAnswersReply theReply) {
+	public void registerValuesSubmitted(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply) {
 	  int i;
 	  DataPointValue anDataPointValue;
 	  
@@ -30,6 +30,12 @@ public class AnswersAdditionalQuestions {
 		  anDataPointValue = this.additionalDataPoints.get(i);
 		  anDataPointValue.registerValueSubmitted(theServerGlobals, theCase, theReply);
 	  }
+		
+	}
+	public void requestMissingAnswers(ServerGlobals theServerGlobals, Case correspondingCase,
+			AssessRequestReply theSubmitReply) {
+		// TODO Auto-generated method stub
+		correspondingCase.requestMissingAnswers( theServerGlobals,theSubmitReply);
 		
 	}
    	

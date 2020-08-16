@@ -3,16 +3,16 @@ package nl.geospatialAI.Assessment;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.DataPoints.DataPoint;
+import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class Fact {
 
 
 	public enum tFactType {
-		HEIGHT_ABOVE_GREENFIELD, PROFESSION_CATEGORY_B,  OBJECT_TYPE_IS_HOUSE
-
-
+		HEIGHT_ABOVE_GREENFIELD, PROFESSION_CATEGORY_B,  OBJECT_TYPE_IS_HOUSE, PERC_NON_WATER_PERMABLE_UNDER_NORM
 		// to be defined in use case
 	}
 
@@ -25,22 +25,22 @@ public class Fact {
 	}
 
 	static int fact_refID = 5000;
-	private int refID;
+	protected int refID;
 	
-	private tFactType factType;
+	protected tFactType factType;
 
-	private tFactClassificationType factResult = Fact.tFactClassificationType.UNKNOWN;
-	private tFactClassificationType defaultFactResult = Fact.tFactClassificationType.UNKNOWN;
+	protected tFactClassificationType factResult = Fact.tFactClassificationType.UNKNOWN;
+	protected tFactClassificationType defaultFactResult = Fact.tFactClassificationType.UNKNOWN;
 
-	private String policyReference;
+	protected String policyReference;
 
-	private String displayName;
+	protected String displayName;
 
-	private List<Fact> mySubFacts;
-	private boolean aValueSet = false;
-	private Fact.tFactClassificationType subFactsOverallResult =  Fact.tFactClassificationType.UNKNOWN;
-	private tOperandType myOperand = Fact.tOperandType.AND;
-
+	protected List<Fact> mySubFacts;
+	protected boolean aValueSet = false;
+	protected Fact.tFactClassificationType subFactsOverallResult =  Fact.tFactClassificationType.UNKNOWN;
+	protected tOperandType myOperand = Fact.tOperandType.AND;
+	protected List<DataPoint> usedDataPoints;
 	
 	public Fact() {
 
@@ -48,6 +48,8 @@ public class Fact {
 		this.setRefID(fact_refID);
 
 		this.mySubFacts = new ArrayList<Fact>();
+
+		this.usedDataPoints = new ArrayList<DataPoint>();
 
 		System.out.println("CREATING FACT [" + this.getRefID() + "]");
 		System.out.println("----------------------------------------");
@@ -114,7 +116,7 @@ public class Fact {
 
 	// ASSESS
 
-	public tFactClassificationType assessFact(ServerGlobals theServerGlobals, int level, boolean exhaustive) {
+	public tFactClassificationType assessFact(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
 
 		theServerGlobals.log("BEOORDEEL FEIT  [level: " + level + "]");
 		theServerGlobals.log("===================================");
@@ -122,8 +124,9 @@ public class Fact {
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("");
 
-		// detemine sub proof (if any)
+	
 
+	    
 		if (this.mySubFacts.size() > 0) {
 			// there are sub facts
 
@@ -135,11 +138,16 @@ public class Fact {
 			theServerGlobals.log("");
 
 			if (this.getOperand().equals(Proof.tOperandType.AND)) {
-				this.evalFactasAND(theServerGlobals, exhaustive, level + 1);
+				this.evalFactasAND(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 			} else if (this.getOperand().equals(Proof.tOperandType.OR)) {
-				this.evalFactasOR(theServerGlobals, exhaustive, level + 1);
+				this.evalFactasOR(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 			}
 			this.setFactResult(this.subFactsOverallResult);
+		}
+		else {
+			// No sub facts
+			this.evaluateFactResult(theServerGlobals, theCase, theReply,  level + 1, exhaustive);
+			
 		}
 
 
@@ -165,7 +173,7 @@ public class Fact {
 		if (this.mySubFacts.size() > 1) {
 			theServerGlobals.log("Onderliggende feiten: " + this.subFactsOverallResult);
 		}
-		theServerGlobals.log("Bron: " + this.getPolicyReference());
+
 
 		theServerGlobals.log("Feit resultaat: " + this.getFactResult());
 		theServerGlobals.log("=================");
@@ -177,13 +185,15 @@ public class Fact {
 
 	// Risk Evaluatie methods
 
-	private void evalFactasAND(ServerGlobals theServerGlobals, boolean exhaustive, int level) {
+
+
+	protected void evalFactasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
 
 		// Review all underlying facts
 		for (i = 0; i < this.mySubFacts.size(); i++) {
-			aFactResult = mySubFacts.get(i).assessFact(theServerGlobals, level, exhaustive);
+			aFactResult = mySubFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
 
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				this.subFactsOverallResult = Fact.tFactClassificationType.FALSE;
@@ -245,13 +255,13 @@ public class Fact {
 		}
 	}
 
-	private void evalFactasOR(ServerGlobals theServerGlobals, boolean exhaustive, int level) {
+	protected void evalFactasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
 
 		// Review all underlying facts
 		for (i = 0; i < this.mySubFacts.size(); i++) {
-			aFactResult = mySubFacts.get(i).assessFact(theServerGlobals, level, exhaustive);
+			aFactResult = mySubFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
 
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				// Positive stay positive
@@ -310,5 +320,18 @@ public class Fact {
 
 		}
 	}
+	
+	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
+		// General implementation used to be overriden
+	     	
+	}
 
+	public void resetUsedDataPoints() {
+		this.usedDataPoints.clear();
+	}
+	
+	public void recordUsedDataPoint(DataPoint aUsedDP) {
+		this.usedDataPoints.add(aUsedDP);
+	}
+	
 }

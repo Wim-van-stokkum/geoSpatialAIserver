@@ -3,13 +3,15 @@ package nl.geospatialAI.Assessment;
 import java.util.ArrayList;
 import java.util.List;
 
+import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class Proof {
 
 	public enum tProofCategoryType {
 		UNDER_MAX_HEIGHT, ALLOWED_PROFFESION_AT_HOUSE, WITHIN_BOUNDARY_BUILD_SURFACE, SURFACE_FOUNDATION,
-		SURFACE_ADDITIONAL_BUILDINGS
+		SURFACE_ADDITIONAL_BUILDINGS, SURFACE_WATER_NON_PERM_ACCEPTABLE
 
 		// to be defined in use case
 	}
@@ -47,6 +49,7 @@ public class Proof {
 
 	private boolean aValueSet = false;
 	private Proof.tProofClassificationType subProofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
+
 	private Fact.tFactClassificationType subFactOverallResult = Fact.tFactClassificationType.UNKNOWN;
 	private tOperandType myOperand = Proof.tOperandType.AND;
 
@@ -118,10 +121,11 @@ public class Proof {
 
 	// ASSESS
 
-	public tProofClassificationType assessProof(ServerGlobals theServerGlobals, int level, boolean exhaustive) {
+	public tProofClassificationType assessProof(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , int level, boolean exhaustive) {
 		tProofClassificationType resultAssessmentSubProof;
 		tProofClassificationType resultFacts;
 
+		
 		theServerGlobals.log("BEOORDEEL BEWIJS  [level: " + level + "]");
 		theServerGlobals.log("===========");
 		theServerGlobals.log("Proof: " + this.getDisplayName() + " [id: " + this.refID + "]");
@@ -129,16 +133,67 @@ public class Proof {
 		theServerGlobals.log("");
 
 		// Assess sub proof (if Any)
+		
+		resultFacts = Proof.tProofClassificationType.UNDETERMINED;
+		resultAssessmentSubProof = Proof.tProofClassificationType.UNDETERMINED;
+		
 		if (this.mySubProofs.size() > 0) {
-			resultAssessmentSubProof = this.AssessSubProofs(theServerGlobals, level, exhaustive);
+			resultAssessmentSubProof = this.AssessSubProofs(theServerGlobals, theCase, theReply,  level, exhaustive);
 		}
+
 		// detemine sub facts (if any)
 		if (this.myFacts.size() > 0) {
-			resultFacts = this.AssessFacts(theServerGlobals, level, exhaustive);
+			resultFacts = this.AssessFacts(theServerGlobals, theCase, theReply,  level, exhaustive);
+			theServerGlobals.log("RECEIVING RESULTFACTS " +resultFacts )  ;
 		}
+
+		// to do overall conclusions over sub proofs and facts
+		if ((this.myFacts.size() > 0) && (this.mySubProofs.size() > 0)) {
+			if (this.myOperand.equals(Proof.tOperandType.AND)) {
+				if (resultAssessmentSubProof.equals(Proof.tProofClassificationType.NEGATIVE)
+						|| resultFacts.equals(Proof.tProofClassificationType.NEGATIVE)) {
+					this.setProofResult(Proof.tProofClassificationType.NEGATIVE);
+				} else if (resultAssessmentSubProof.equals(Proof.tProofClassificationType.POSITIVE)
+						&& resultFacts.equals(Proof.tProofClassificationType.POSITIVE)) {
+					this.setProofResult(Proof.tProofClassificationType.POSITIVE);
+				} else if (resultAssessmentSubProof.equals(Proof.tProofClassificationType.UNDETERMINED)
+						|| resultFacts.equals(Proof.tProofClassificationType.UNDETERMINED)) {
+
+					this.setProofResult(Proof.tProofClassificationType.UNDETERMINED);
+				}
+
+			}
+
+			if (this.myOperand.equals(Proof.tOperandType.OR)) {
+				if (resultAssessmentSubProof.equals(Proof.tProofClassificationType.POSITIVE)
+						|| resultFacts.equals(Proof.tProofClassificationType.POSITIVE)) {
+					this.setProofResult(Proof.tProofClassificationType.POSITIVE);
+				} else if (resultAssessmentSubProof.equals(Proof.tProofClassificationType.NEGATIVE)
+						&& resultFacts.equals(Proof.tProofClassificationType.NEGATIVE)) {
+					this.setProofResult(Proof.tProofClassificationType.NEGATIVE);
+				} else if (resultAssessmentSubProof.equals(Proof.tProofClassificationType.UNDETERMINED)
+						|| resultFacts.equals(Proof.tProofClassificationType.UNDETERMINED)) {
+
+					this.setProofResult(Proof.tProofClassificationType.UNDETERMINED);
+				}
+
+			}
+
+		}
+
+		if ((this.myFacts.size() > 0) && (this.mySubProofs.size() == 0)) {
+			this.setProofResult(resultFacts);
+			theServerGlobals.log("SET RESULT FOR FACTS: " + resultFacts);
+		}
+
+		if ((this.myFacts.size() == 0) && (this.mySubProofs.size() > 0)) {
+			this.setProofResult(resultAssessmentSubProof);
+			theServerGlobals.log("SET RESULT FOR PROOFS: " + resultAssessmentSubProof);
+		}
+
 		// if applicable set default value
 
-		if ((this.getProofResult().equals(Proof.tProofClassificationType.UNDETERMINED) == false)
+		if ((this.getProofResult().equals(Proof.tProofClassificationType.UNDETERMINED) == true)
 				&& (this.getDefaultProofResult().equals(Proof.tProofClassificationType.UNDETERMINED) == false)) {
 
 			theServerGlobals.log("Using default value : " + this.getDefaultProofResult());
@@ -155,10 +210,13 @@ public class Proof {
 		theServerGlobals.log("Bewijs: " + this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Bron: " + this.getPolicyReference());
 		if (this.mySubProofs.size() > 1) {
-			theServerGlobals.log("Onderliggende bewijzen: " + this.subProofOverallResult);
+			theServerGlobals.log("Onderliggende bewijzen: " + resultAssessmentSubProof);
+		}
+		if (this.myFacts.size() > 1) {
+			theServerGlobals.log("Onderliggende feiten: " + resultFacts);
 		}
 		theServerGlobals.log("Bron: " + this.getPolicyReference());
-//		/	theServerGlobals.log("Feiten" + factOverallResult);
+
 		theServerGlobals.log("Bewijs resultaat: " + this.getProofResult());
 		theServerGlobals.log("=================");
 
@@ -167,8 +225,10 @@ public class Proof {
 		return (this.getProofResult());
 	}
 
-	private tProofClassificationType AssessSubProofs(ServerGlobals theServerGlobals, int level, boolean exhaustive) {
+	private tProofClassificationType AssessSubProofs(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , int level, boolean exhaustive) {
 		// determine sub proof (if any)
+
+		tProofClassificationType conclusion;
 
 		theServerGlobals.log("BEOORDEEL ONDERLIGGENDE BEWIJZEN  [level: " + level + "]");
 		theServerGlobals.log("============================================================");
@@ -178,18 +238,18 @@ public class Proof {
 		theServerGlobals.log("");
 
 		if (this.getOperand().equals(Proof.tOperandType.AND)) {
-			this.evalProofasAND(theServerGlobals, exhaustive, level + 1);
+			this.evalProofasAND(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 		} else if (this.getOperand().equals(Proof.tOperandType.OR)) {
-			this.evalProofasOR(theServerGlobals, exhaustive, level + 1);
+			this.evalProofasOR(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 		}
-		this.setProofResult(this.subProofOverallResult);
+		conclusion = subProofOverallResult;
 
-		return this.subProofOverallResult;
+		return conclusion;
 	}
-	
-	private tProofClassificationType AssessFacts(ServerGlobals theServerGlobals, int level, boolean exhaustive) {
-		// determine sub proof (if any)
-		
+
+	private tProofClassificationType AssessFacts(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
+		// determine facts
+
 		tProofClassificationType conclusion;
 
 		theServerGlobals.log("BEOORDEEL FEITEN  [level: " + level + "]");
@@ -198,26 +258,34 @@ public class Proof {
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("Operand: " + this.getOperand());
 		theServerGlobals.log("");
-
+           
 		if (this.getOperand().equals(Proof.tOperandType.AND)) {
-			this.evalFactsasAND(theServerGlobals, exhaustive, level + 1);
+			this.evalFactsasAND(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 		} else if (this.getOperand().equals(Proof.tOperandType.OR)) {
-			this.evalFactsasOR(theServerGlobals, exhaustive, level + 1);
+			this.evalFactsasOR(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 		}
-		
-		//Conclusion
-	//	this.setProofResult(this.subFactOverallResult);
+;
+		// Conclusion
+		conclusion = Proof.tProofClassificationType.UNDETERMINED;
+		theServerGlobals.log("KOM NA DE AND " + this.subFactOverallResult );
+		if (this.subFactOverallResult.equals(Fact.tFactClassificationType.TRUE)) {
+			conclusion = Proof.tProofClassificationType.POSITIVE;
+		} else if (this.subFactOverallResult.equals(Fact.tFactClassificationType.FALSE)) {
+			conclusion = Proof.tProofClassificationType.NEGATIVE;
+		} else if (this.subFactOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)) {
+			conclusion = Proof.tProofClassificationType.UNDETERMINED;
+		}
 
-		return this.subProofOverallResult;
+		return conclusion;
 	}
 
-	private void evalProofasAND(ServerGlobals theServerGlobals, boolean exhaustive, int level) {
+	private void evalProofasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive, int level) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
-			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, level, exhaustive);
+			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply,level, exhaustive);
 
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.subProofOverallResult = Proof.tProofClassificationType.NEGATIVE;
@@ -279,13 +347,13 @@ public class Proof {
 		}
 	}
 
-	private void evalProofasOR(ServerGlobals theServerGlobals, boolean exhaustive, int level) {
+	private void evalProofasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive, int level) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
-			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, level, exhaustive);
+			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply, level, exhaustive);
 
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
@@ -344,19 +412,20 @@ public class Proof {
 
 		}
 	}
-	
-	
-	// FACTS
-	
 
-	private void evalFactsasAND(ServerGlobals theServerGlobals, boolean exhaustive, int level) {
+	// FACTS
+
+	private void evalFactsasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
 
-		// Proof all underlying proofs
+		// Proof all underlying facts
+		this.subFactOverallResult = Fact.tFactClassificationType.UNKNOWN;
+		this.aValueSet = false;
 		for (i = 0; i < this.myFacts.size(); i++) {
-			aFactResult = myFacts.get(i).assessFact(theServerGlobals, level, exhaustive);
-
+			aFactResult = myFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
+			theServerGlobals.log("Na Aanroep AssessFact" + aFactResult);
+			
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				this.subFactOverallResult = Fact.tFactClassificationType.FALSE;
 				aValueSet = true;
@@ -369,7 +438,7 @@ public class Proof {
 				// Positive remains positive : no action
 				// Undetermined, set : no action
 
-				if (this.subProofOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)) {
+				if (this.subFactOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)) {
 					if (this.aValueSet == false) {
 						// flip undetermined first time to positive
 
@@ -417,19 +486,18 @@ public class Proof {
 		}
 	}
 
-	private void evalFactsasOR(ServerGlobals theServerGlobals, boolean exhaustive, int level) {
+	private void evalFactsasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
-			aFactResult = this.myFacts.get(i).assessFact(theServerGlobals, level, exhaustive);
+			aFactResult = this.myFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
 
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				// Positive stay positive
 				// Negative stays negative
-				if (this.subFactOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)
-						&& (aValueSet = true)) {
+				if (this.subFactOverallResult.equals(Fact.tFactClassificationType.UNKNOWN) && (aValueSet = true)) {
 
 					this.subFactOverallResult = Fact.tFactClassificationType.FALSE;
 					aValueSet = true;
