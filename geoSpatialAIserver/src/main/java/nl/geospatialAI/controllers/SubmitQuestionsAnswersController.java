@@ -28,7 +28,6 @@ public class SubmitQuestionsAnswersController {
 		Case correspondingCase;
 		ErrorReason anError;
 		AssessRequestReply theSubmitReply;
-		
 
 		// get globals
 		theServerGlobals = ServerGlobals.getInstance();
@@ -37,34 +36,36 @@ public class SubmitQuestionsAnswersController {
 		// create the reply
 		theSubmitReply = new AssessRequestReply();
 
-
 		// process the request
 		// - Get The corresponding (anomynous) case
 		correspondingCase = theServerGlobals.getCaseRegistration().GetCaseByCaseNo(aRequest.getReferenceID());
 
 		if (correspondingCase == null) {
-			anError = ErrorReason.createErrorReason_info(ErrorReason.t_ErrorReasonType.NO_CASE_REGISTERED, "with case ID : " +  aRequest.getReferenceID());
+			anError = ErrorReason.createErrorReason_info(ErrorReason.t_ErrorReasonType.NO_CASE_REGISTERED,
+					"with case ID : " + aRequest.getReferenceID());
 			theSubmitReply.registerErrorReason(anError);
-			theServerGlobals.log("No case found [" +aRequest.getReferenceID() +   "] for submitted datapoint values");
+			theServerGlobals.log("No case found [" + aRequest.getReferenceID() + "] for submitted datapoint values");
 		} else {
 			theSubmitReply.setCaseID(correspondingCase.getCaseID());
 			// - Register the new values
 			aRequest.registerValuesSubmitted(theServerGlobals, correspondingCase, theSubmitReply);
-			
+
 			// Register missing values as still requested and add risks to reply
-		
+
 			aRequest.requestMissingAnswers(theServerGlobals, correspondingCase, theSubmitReply);
 			correspondingCase.addRisksToReply(theServerGlobals, theSubmitReply);
-			// Reassess and 
-		
+			// Reassess and
+
 			correspondingCase.startAssessment(theServerGlobals, theSubmitReply);
 			correspondingCase.evaluateAssessmentCriteria(theServerGlobals, theSubmitReply);
-			
+
 		}
 
 		// sent the reply
-		theSubmitReply.setReferenceID(correspondingCase.getCaseNo());
-		theSubmitReply.EvalStatus();
+		if (correspondingCase != null) {
+			theSubmitReply.setReferenceID(correspondingCase.getCaseNo());
+			theSubmitReply.EvalStatus();
+		}
 		return theSubmitReply;
 
 	}
