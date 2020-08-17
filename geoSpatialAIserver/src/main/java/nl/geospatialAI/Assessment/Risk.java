@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import nl.geospatialAI.Assessment.AssessmentCriterium.tAssessmentCriteriumCategoryType;
 import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.Justification.JustificationRisk;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -349,6 +350,20 @@ public class Risk {
 
 		theServerGlobals.log("");
 
+	}
+
+
+
+	public void justifyTheProofs(ServerGlobals theServerGlobals, Case correspondingCase, Risk aRisk,
+			JustificationRisk justificationRisk) {
+	    int i;
+	    Proof aProof;
+	    
+	    for (i = 0 ; i< this.myProofs.size();  i ++) {
+	    	aProof = this.myProofs.get(i);
+	    	aProof.justifyProof(theServerGlobals,correspondingCase, aRisk,justificationRisk  );
+	    }
+		
 	}
 
 }

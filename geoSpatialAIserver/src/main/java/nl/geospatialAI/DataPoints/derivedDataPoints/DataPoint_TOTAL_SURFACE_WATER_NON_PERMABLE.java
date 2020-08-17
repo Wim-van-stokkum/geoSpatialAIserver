@@ -37,24 +37,31 @@ public class DataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE extends DataPoint {
 		succesA = false;
 		succesB = false;
 		total = 0.0;
-
+        this.resetUsedDataPoints();
+        
 		// Get my Datapoints
+        this.setDatapointSource(DataPoint.DP_source.RULE_ENGINE);
 		DP_surfaceObject = theCase.getCaseDataPointByType(theServiceGlobals, theReply,
 				DataPoint.DP_Type.SURFACE_CALCULATED_OBJECT);
 		if (DP_surfaceObject.hasValue()) {
+			this.recordUsedDataPoint(DP_surfaceObject);
 			surfObject = DP_surfaceObject.getConvertedValueDouble();
 			total = surfObject;
 			succesA = true;
 		}
 		DP_hasGarden = theCase.getCaseDataPointByType(theServiceGlobals, theReply, DataPoint.DP_Type.DESIGN_HAS_GARDEN);
 		if (DP_hasGarden.hasValue()) {
+			this.recordUsedDataPoint(DP_hasGarden);
 			theServiceGlobals.log("HEEFT TUIN : "  + DP_hasGarden.getConvertedValueBoolean());
 			if (DP_hasGarden.getConvertedValueBoolean()) {
+			
 				DP_surfaceGarden = theCase.getCaseDataPointByType(theServiceGlobals, theReply,
 						DataPoint.DP_Type.SURFACE_CALCULATED_GARDEN);
+				this.recordUsedDataPoint(DP_surfaceGarden);
 				DP_surfaceGardenTiled = theCase.getCaseDataPointByType(theServiceGlobals, theReply,
 						DataPoint.DP_Type.SURFACE_TILES_GARDEN);
 				if (DP_surfaceGardenTiled.hasValue()) {
+					this.recordUsedDataPoint(DP_surfaceGardenTiled);
 					surfTiled = DP_surfaceGardenTiled.getConvertedValueDouble();
 					total = total + surfTiled;
 					succesB = true;

@@ -6,6 +6,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.Justification.JustificationDatapoint;
+import nl.geospatialAI.Justification.JustificationFact;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -71,7 +73,7 @@ public class DataPoint {
 
 	public enum DP_source {
 		FORMAL_REGISTRY, ADMINISTRATION, USER, DIGITAL_TWIN, DESIGN_FILE, EXTERNAL_INFORMAL, EXTERNAL_FORMAL, UNKNOWN,
-		OTHER
+		RULE_ENGINE, OTHER
 	}
 
 	private static int dpRefID = 99;
@@ -103,6 +105,7 @@ public class DataPoint {
 	float maxValueNumber;
 	List<String> values;
 	List<AllowedValue> allowedValueList;
+	protected List<DataPoint> usedDataPoints;
 
 	public DataPoint() {
 
@@ -110,6 +113,15 @@ public class DataPoint {
 		this.setDP_refId(dpRefID);
 		System.out.println("CREATING DATAPOINT: " + this.getDP_refId());
 		isAskable = true;
+		usedDataPoints = new ArrayList<DataPoint>();
+	}
+
+	public void resetUsedDataPoints() {
+		this.usedDataPoints.clear();
+	}
+
+	public void recordUsedDataPoint(DataPoint aUsedDP) {
+		this.usedDataPoints.add(aUsedDP);
 	}
 
 	public DataPoint(DataPoint.DP_Type aSpecificType) {
@@ -117,6 +129,7 @@ public class DataPoint {
 		this.setDP_refId(dpRefID);
 		System.out.println("CREATING DATAPOINT: " + this.getDP_refId());
 		isAskable = true;
+		usedDataPoints = new ArrayList<DataPoint>();
 		this.initDataPoint(aSpecificType);
 
 	}
@@ -442,13 +455,12 @@ public class DataPoint {
 		// Standard no derivation
 
 	}
-	
-	// ====================================================================================
-	// ====================================================================================
-	// ================================== INITS         ===================================
-	// ====================================================================================
-	// ====================================================================================
 
+	// ====================================================================================
+	// ====================================================================================
+	// ================================== INITS ===================================
+	// ====================================================================================
+	// ====================================================================================
 
 	private void initDataPoint_BIMFILEURL() {
 		System.out.println("INIT BIMFILEURL");
@@ -718,7 +730,7 @@ public class DataPoint {
 
 	private void initDataPoint_SURFACE_CALCULATED_GARDEN() {
 		DataPoint newDP;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -727,10 +739,10 @@ public class DataPoint {
 		newDP.setQuestionText("Wat is de oppervlakte van de tuin?");
 		newDP.setExplanationText("Wij vragen dit de watertoelatendheid vast te stellen");
 	}
-	
+
 	private void initDataPoint_CHAMBREOFCOMMERCEDOSSIERNUMBER() {
 		DataPoint newDP;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
 		newDP.setDataType(DataPoint.DP_dataType.TEXT);
@@ -739,10 +751,10 @@ public class DataPoint {
 		newDP.setQuestionText("Wat is de oppervlakte van de tuin?");
 		newDP.setExplanationText("Wij vragen dit de watertoelatendheid vast te stellen");
 	}
-	
+
 	private void initDataPoint_PERC_WATER_PERM_GARDEN() {
 		DataPoint newDP;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -751,10 +763,10 @@ public class DataPoint {
 		newDP.setQuestionText("Percentage waterdoorlatendheid tuin?");
 		newDP.setExplanationText("Wij vragen dit de totale watertoelatendheid vast te stellen");
 	}
-	
+
 	private void initDataPoint_SURFACE_TILES_GARDEN() {
 		DataPoint newDP;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -764,10 +776,10 @@ public class DataPoint {
 		newDP.setExplanationText("Wij vragen dit de totale watertoelatendheid vast te stellen van de tuin");
 
 	}
-	
+
 	private void initDataPoint_DESIGN_HAS_GARDEN() {
 		DataPoint newDP;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.TRUTHVALUE);
@@ -777,10 +789,10 @@ public class DataPoint {
 		newDP.setExplanationText("Wij vragen dit de totale watertoelatendheid vast te stellen van de tuin");
 
 	}
-	
+
 	private void initDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE() {
 		DataPoint newDP;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -829,13 +841,48 @@ public class DataPoint {
 			this.initDataPoint_PERC_WATER_PERM_GARDEN();
 		} else if (aDPtype.equals(DataPoint.DP_Type.SURFACE_TILES_GARDEN)) {
 			this.initDataPoint_SURFACE_TILES_GARDEN();
-		}  else if (aDPtype.equals(DataPoint.DP_Type.DESIGN_HAS_GARDEN)) {
+		} else if (aDPtype.equals(DataPoint.DP_Type.DESIGN_HAS_GARDEN)) {
 			this.initDataPoint_DESIGN_HAS_GARDEN();
-		}   else if (aDPtype.equals(DataPoint.DP_Type.TOTAL_SURFACE_WATER_NON_PERMABLE)) {
+		} else if (aDPtype.equals(DataPoint.DP_Type.TOTAL_SURFACE_WATER_NON_PERMABLE)) {
 			this.initDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE();
 		} else
-			ServerGlobals.getInstance().log("ERROR: No init entry for " + aDPtype );
+			ServerGlobals.getInstance().log("ERROR: No init entry for " + aDPtype);
 
+	}
+
+	public void justifyDataPoint(ServerGlobals theServerGlobals, Case correspondingCase,
+			JustificationFact myFactJustification) {
+
+		int i;
+		DataPoint aUsedDataPoint;
+		
+		JustificationDatapoint myDataPointJustification;
+
+		myDataPointJustification = new JustificationDatapoint(this);
+		myFactJustification.addJustificationDataPoint(myDataPointJustification);
+
+		// To do Sub DataPoints
+		for (i = 0; i < this.usedDataPoints.size(); i++) {
+			aUsedDataPoint = this.usedDataPoints.get(i);
+			aUsedDataPoint.justifyChildDataPoint(theServerGlobals,correspondingCase, myDataPointJustification); 
+		}
+	}
+
+	private void justifyChildDataPoint(ServerGlobals theServerGlobals, Case correspondingCase,
+			JustificationDatapoint myDataPointJustification) {
+		JustificationDatapoint ChildDataPointJustification;
+		DataPoint aUsedDataPoint;
+        int i;
+        
+        
+		ChildDataPointJustification = new JustificationDatapoint(this);
+		myDataPointJustification.addChildDataPointJustification(ChildDataPointJustification);
+		// To do Sub DataPoints
+				for (i = 0; i < this.usedDataPoints.size(); i++) {
+					aUsedDataPoint = this.usedDataPoints.get(i);
+					aUsedDataPoint.justifyChildDataPoint(theServerGlobals,correspondingCase, myDataPointJustification); 
+				}
+		
 	}
 
 }

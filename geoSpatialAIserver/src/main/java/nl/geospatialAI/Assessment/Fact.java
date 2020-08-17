@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
+import nl.geospatialAI.Justification.JustificationFact;
+import nl.geospatialAI.Justification.JustificationProof;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -352,6 +354,24 @@ public class Fact {
 	
 	public void recordUsedDataPoint(DataPoint aUsedDP) {
 		this.usedDataPoints.add(aUsedDP);
+	}
+
+	public void justifyFact(ServerGlobals theServerGlobals, Case correspondingCase,
+			JustificationProof myProofJustification) {
+	     JustificationFact myFactJustification;
+	     
+	     int i;
+	     DataPoint aDPused;
+	     
+	     myFactJustification = new JustificationFact(this);
+	     myProofJustification.addJustificationFact(myFactJustification);
+	     
+	     for (i = 0 ; i < this.usedDataPoints.size(); i++) {
+	    	 aDPused = this.usedDataPoints.get(i);
+	    	 aDPused.justifyDataPoint(theServerGlobals, correspondingCase, myFactJustification);
+	    
+	     }
+		
 	}
 	
 }

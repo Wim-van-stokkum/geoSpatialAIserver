@@ -6,6 +6,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.Justification.JustificationProof;
+import nl.geospatialAI.Justification.JustificationRisk;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -29,13 +31,7 @@ public class Proof {
 	static int proof_refID = 500;
 	private int refID;
 
-	public int getRefID() {
-		return refID;
-	}
-
-	public void setRefID(int refID) {
-		this.refID = refID;
-	}
+	
 
 	private tProofCategoryType proofCategory;
 
@@ -74,6 +70,15 @@ public class Proof {
 	@JsonIgnore
 	public String explainYourSelf() {
 		return this.explanation;
+	}
+	
+	
+	public int getRefID() {
+		return refID;
+	}
+
+	public void setRefID(int refID) {
+		this.refID = refID;
 	}
 	
 	public void setProofCategory(tProofCategoryType proofCategory) {
@@ -574,6 +579,26 @@ public class Proof {
 			}
 
 		}
+	}
+
+	public void justifyProof(ServerGlobals theServerGlobals, Case correspondingCase, Risk aRisk,
+			JustificationRisk justificationRisk) {
+		
+		int i;
+		Fact aFact;
+		
+		
+		 JustificationProof myProofJustification;
+		 myProofJustification = new JustificationProof(this);
+		 justificationRisk.addProofJustification(myProofJustification);
+		 
+		 for (i = 0 ; i < this.myFacts.size(); i++ ) {
+			 aFact = this.myFacts.get(i);
+			 aFact.justifyFact(theServerGlobals, correspondingCase, myProofJustification);
+		 }
+		 
+		 
+		
 	}
 
 }

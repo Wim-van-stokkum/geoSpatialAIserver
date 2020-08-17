@@ -319,6 +319,7 @@ public class Case {
 				} else {
 					dp_BIM_filename.changeValue("WONING.BIM", theServerGlobals);
 					this.theBIMfile.setFileName("WONING.BIM");
+					dp_BIM_filename.setDatapointSource(DataPoint.DP_source.USER);
 					this.theBIMfile.processBIMfile(theServerGlobals, theCase);
 				}
 			} else {
@@ -389,6 +390,22 @@ public class Case {
 			waterCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
 		}
         theReply.addAssessmentCriterium(waterCriterium);
+	}
+
+	public Risk getRiskByID(int riskRefID) {
+		Risk theRisk;
+		Risk aRisk;
+		int i;
+		
+		theRisk = null;
+		for (i = 0; i < this.myRisks.size() ; i++) {
+			aRisk = this.myRisks.get(i);
+			if (aRisk.getRefID() == riskRefID) {
+				theRisk = aRisk;
+			}
+		}
+		
+		return theRisk;
 	}
 
 }

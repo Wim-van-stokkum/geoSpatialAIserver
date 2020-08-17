@@ -44,7 +44,13 @@ public class DataPointValue {
 		theDataPointSubmitted = theCase.GetDataPointByID(this.DP_refId);
 	    if (theDataPointSubmitted != null) {
 	    	theDataPointSubmitted.changeValue(this.value,theServerGlobals );
-	    	theDataPointSubmitted.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+	    	if (this.valueSource.equals( DP_source.UNKNOWN)){
+	    		theDataPointSubmitted.setDatapointSource(DataPoint.DP_source.USER);
+	    	}
+	    	else {
+	    		theDataPointSubmitted.setDatapointSource(this.valueSource);
+	    	}
+	    	
 	    }
 	    else
 	    {

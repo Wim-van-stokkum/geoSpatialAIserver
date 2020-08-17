@@ -10,7 +10,8 @@ public class ErrorReason {
 
 	public enum t_ErrorReasonType {
 		NO_CASE_REGISTERED,
-		NO_DATAPOINT_EXISTS
+		NO_DATAPOINT_EXISTS,
+		NO_RISK_FOUND
 	}
 
     public t_ErrorReasonSeverity severity;

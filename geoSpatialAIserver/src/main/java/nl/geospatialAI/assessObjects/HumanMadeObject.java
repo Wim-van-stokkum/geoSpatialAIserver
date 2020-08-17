@@ -83,6 +83,10 @@ public class HumanMadeObject {
 			this.myDataPointsByID.put(aDP.getDP_refId(), aDP);
 			theCase.index_a_Datapoint(aDP);
 			aDP.setStatus(DataPoint.DP_Status.PROVIDED);
+			
+			if (aDP.getDatapointSource().equals(DataPoint.DP_source.UNKNOWN)) {
+				aDP.setDatapointSource(DataPoint.DP_source.USER);
+			}
 			aDP.initDataPoint(aDP.getDataPointType());
 			theServerGlobals.log("Registreren HM  datapoint " + aDP.getDataPointType() + " [" + aDP.getDP_refId()
 					+ "] value = " + aDP.getValue());

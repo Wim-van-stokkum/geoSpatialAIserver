@@ -3,7 +3,11 @@ package nl.geospatialAI.beans;
 import java.util.ArrayList;
 import java.util.List;
 
+import nl.geospatialAI.Assessment.Risk;
+import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.Errorhandling.ErrorReason;
+import nl.geospatialAI.Justification.JustificationRisk;
+import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class JustifyRiskReply {
 	
@@ -16,10 +20,11 @@ public class JustifyRiskReply {
  	int referenceID;
  	int riskRefID;
 	public String caseID;
- 	t_JustifyReplyStatus JustifyReplyStatus;
+	public t_JustifyReplyStatus JustifyReplyStatus;
  	
- 	String answer = "Daarom !";
-    List<ErrorReason> myErrorReasons;
+	public JustificationRisk justificationOfRisk;
+    
+	public List<ErrorReason> myErrorReasons;
 
     
  	public int getReferenceID() {
@@ -70,17 +75,6 @@ public class JustifyRiskReply {
 
 
 
-	public String getAnswer() {
-		return answer;
-	}
-
-
-
-	public void setAnswer(String answer) {
-		this.answer = answer;
-	}
-
-
 
 	public List<ErrorReason> getMyErrorReasons() {
 		return myErrorReasons;
@@ -117,5 +111,14 @@ public class JustifyRiskReply {
 			  this.JustifyReplyStatus =  JustifyRiskReply.t_JustifyReplyStatus.OK;
 			
 		}
+	}
+
+
+
+	public void justifyTheRisk(ServerGlobals theServerGlobals, Case correspondingCase, Risk theRisk) {
+		
+		this.justificationOfRisk = new JustificationRisk(theRisk, theServerGlobals, correspondingCase, this);
+		
+		
 	}
 }
