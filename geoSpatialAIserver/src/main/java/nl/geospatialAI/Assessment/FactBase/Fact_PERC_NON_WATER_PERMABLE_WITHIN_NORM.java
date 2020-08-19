@@ -1,8 +1,5 @@
 package nl.geospatialAI.Assessment.FactBase;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 import nl.geospatialAI.Assessment.Fact;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
@@ -11,31 +8,18 @@ import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 
-
-	
 	@Override
 	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
 			int level, boolean exhaustive) {
 		theServerGlobals.log("Evaluatie van feit :" + this.getDisplayName());
 
 		this.resetUsedDataPoints();
-        if (theCase.hasBIM()) {
-        	this.evaluateNoBIM(theServerGlobals, theCase, theReply, level, exhaustive);
-        }
-        else {
-        	this.evaluateNoBIM(theServerGlobals, theCase, theReply, level, exhaustive);
-        }
+
+		this.evaluate(theServerGlobals, theCase, theReply, level, exhaustive);
+
 	}
 
-	private  double round(double value, int places) {
-	    if (places < 0) throw new IllegalArgumentException();
-
-	    BigDecimal bd = BigDecimal.valueOf(value);
-	    bd = bd.setScale(places, RoundingMode.HALF_UP);
-	    return bd.doubleValue();
-	}
-	
-	private void evaluateNoBIM(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level,
+	private void evaluate(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level,
 			boolean exhaustive) {
 		DataPoint dp_SurfPane;
 		DataPoint dp_SurfTotalNonPerm;
@@ -64,19 +48,20 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 				surfNonPermValue = dp_SurfTotalNonPerm.getConvertedValueDouble();
 				percNonPerm = (surfNonPermValue / surfPaneValue);
 				theServerGlobals.log("CALC PERC NON PERM: " + percNonPerm + "% kleiner : " + ((100.0 - norm) / 100.0));
-				percNonPerm_afgerond = this.round((percNonPerm * 100), 2);
+				percNonPerm_afgerond = theServerGlobals.round((percNonPerm * 100), 2);
 				if (percNonPerm <= ((100.0 - norm) / 100.0)) {
 					this.setFactResult(Fact.tFactClassificationType.TRUE);
-					this.addToExplanation("OK: Percentage aandeel niet watertoelatend deel perceel [" + (percNonPerm_afgerond )+  "%] ligt binnen de norm van "+ (100- norm) +  "%.");
+					this.addToExplanation("OK: Percentage aandeel niet watertoelatend deel perceel ["
+							+ (percNonPerm_afgerond) + "%] ligt binnen de norm van " + (100 - norm) + "%.");
 				} else {
 					this.setFactResult(Fact.tFactClassificationType.FALSE);
-					this.addToExplanation("NIET OK: Percentage aandeel niet watertoelatend deel perceel [" + (percNonPerm_afgerond )+  "%] ligt boven de norm van "+ (100- norm) +  "%.");
+					this.addToExplanation("NIET OK: Percentage aandeel niet watertoelatend deel perceel ["
+							+ (percNonPerm_afgerond) + "%] ligt boven de norm van " + (100 - norm) + "%.");
 				}
 
 			}
 		}
-		
-		
+
 	}
-	
+
 }

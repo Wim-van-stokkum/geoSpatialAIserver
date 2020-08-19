@@ -16,7 +16,11 @@ public class Fact {
 
 
 	public enum tFactType {
-		HEIGHT_ABOVE_GREENFIELD, PROFESSION_CATEGORY_B,  OBJECT_TYPE_IS_HOUSE, PERC_NON_WATER_PERMABLE_UNDER_NORM
+		HEIGHT_ABOVE_GREENFIELD, HOUSE_HEIGHT_WITHIN_NORM, OFFICE_HEIGHT_WITHIN_NORM, 
+		PROFESSION_CATEGORY_B, OBJECT_TYPE_IS_OFFICE,  
+		OBJECT_TYPE_IS_HOUSE, 
+		PERC_NON_WATER_PERMABLE_UNDER_NORM,
+		OBJECT_IS_COMMERCIAL_BUILDING
 		// to be defined in use case
 	}
 
@@ -109,7 +113,7 @@ public class Fact {
 			this.explanation = aText;
 		}
 		else {
-			this.explanation.concat(" " + aText);
+			this.explanation = this.explanation + " " +  aText;
 		}
 		
 	}
@@ -270,7 +274,7 @@ public class Fact {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van gecombineerd feit " + this.refID
 						+ ". Een van onderliggende feiten zijn FALSE en operand is AND");
-
+				this.clearExplanation();
 				break;
 			}
 
@@ -336,6 +340,7 @@ public class Fact {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van combinatie feit " + this.refID
 						+ ". Een van onderliggende subbewijzen is TRUE en operand is OR");
+				this.clearExplanation();
 
 				break;
 			}
@@ -343,6 +348,11 @@ public class Fact {
 		}
 	}
 	
+	private void clearExplanation() {
+		this.explanation = "";
+		
+	}
+
 	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
 		// General implementation used to be overriden
 	     	

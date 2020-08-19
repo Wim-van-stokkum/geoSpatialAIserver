@@ -6,8 +6,9 @@ import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
-public class Fact_OBJECT_IS_HOUSE extends Fact {
-    
+public class Fact_PROFESSION_CATEGORY_B extends Fact {
+
+
 	@Override
 	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
 			int level, boolean exhaustive) {
@@ -34,7 +35,7 @@ public class Fact_OBJECT_IS_HOUSE extends Fact {
         purposeValue = "";
 
         dp_Purpose_HM_OBJECT = theCase.getCaseDataPointByType(theServerGlobals, theReply,
-				DataPoint.DP_Type.PURPOSE_HM_OBJECT);
+				DataPoint.DP_Type.PROFESSION_AT_HOME);
 
 		if (dp_Purpose_HM_OBJECT.hasValue()) {
 			this.recordUsedDataPoint(dp_Purpose_HM_OBJECT);
@@ -66,3 +67,4 @@ public class Fact_OBJECT_IS_HOUSE extends Fact {
 	}
 
 }
+

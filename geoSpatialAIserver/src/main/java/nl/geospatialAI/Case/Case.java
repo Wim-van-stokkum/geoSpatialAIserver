@@ -145,10 +145,16 @@ public class Case {
 	}
 
 	public void determinePolicyForContext(PolicyLibrary thePolicyLibrary, AssessRequestReply theReply) {
-		Risk risk1;
+		Risk riskWater;
+		Risk horizonPolution;
+		Risk commercialUse;
 
-		risk1 = thePolicyLibrary.createRisk_WATER_PERMABILITY();
-		this.myRisks.add(risk1);
+		riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
+		this.myRisks.add(riskWater);
+		horizonPolution = thePolicyLibrary.createRisk_HORIZON_POLUTION();
+		this.myRisks.add(horizonPolution);
+		commercialUse = thePolicyLibrary.createRisk_COMMERCIAL_USE();
+		this.myRisks.add(commercialUse);
 	}
 
 	public void addRisksToReply(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
@@ -245,14 +251,6 @@ public class Case {
 					theReply);
 		} else
 
-		if (theType.equals(DataPoint.DP_Type.SURFACE_TILES_GARDEN)) {
-			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_SURFACE_TILES_GARDEN(this, theServiceGlobals,
-					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
-		}
-
-		else
-
 		if (theType.equals(DataPoint.DP_Type.TOTAL_SURFACE_WATER_NON_PERMABLE)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE(this,
 					theServiceGlobals, theReply);
@@ -268,7 +266,36 @@ public class Case {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_DESIGN_HAS_GARDEN(this, theServiceGlobals,
 					theReply);
 			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+		} else if (theType.equals(DataPoint.DP_Type.PURPOSE_HM_OBJECT)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_PURPOSE_HM_OBJECT(this, theServiceGlobals,
+					theReply);
+			this.getTheDestinationPane().addRequestedDataPoint(newDP);
 		} else
+
+		if (theType.equals(DataPoint.DP_Type.MEASUREDHEIGHT)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_MEASUREDHEIGHT(this, theServiceGlobals,
+					theReply);
+			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+		}
+
+		else
+
+		if (theType.equals(DataPoint.DP_Type.PROFESSION_AT_HOME)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_PROFESSION_AT_HOME(this, theServiceGlobals,
+					theReply);
+			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+		}
+		
+
+		else
+
+		if (theType.equals(DataPoint.DP_Type.BUILDINGCATEGORY)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_BUILDINGCATEGORY(this, theServiceGlobals,
+					theReply);
+			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+		}
+
+		else
 			theServiceGlobals.log("ERROR CREATING NEW DP: no creation point for type: " + theType);
 
 		// Register stuff
@@ -284,8 +311,6 @@ public class Case {
 	}
 
 	public void requestMissingAnswers(ServerGlobals theServerGlobals, AssessRequestReply theSubmitReply) {
-		// TODO Auto-generated method stub
-		int i;
 
 		this.theDestinationPane.requestMissingAnswers(theServerGlobals, theSubmitReply);
 		this.theHumanMadeObject.requestMissingAnswers(theServerGlobals, theSubmitReply);
@@ -349,8 +374,10 @@ public class Case {
 
 	public void evaluateAssessmentCriteria(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
 		// AssessmentCriteria Water
-		
+
 		this.evaluateAssessmentCriteriaWater(theServerGlobals, theReply);
+		this.evaluateAssessmentLivingEnvironment(theServerGlobals, theReply);
+		this.evaluateAssessmentPurpose(theServerGlobals, theReply);
 	}
 
 	private void evaluateAssessmentCriteriaWater(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
@@ -371,13 +398,13 @@ public class Case {
 		for (i = 0; i < this.myRisks.size(); i++) {
 			aRisk = this.myRisks.get(i);
 			if (aRisk.getMyAssessmentCriterium().equals(waterCriterium.getCriteriumCategory())) {
-			    if (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false) {
-			    	aantalRisk = aantalRisk + 1;
-			    }
+				if (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false) {
+					aantalRisk = aantalRisk + 1;
+				}
 				if ((aRisk.getRiskValue().equals(Risk.tRiskClassificationType.NEUTRAL) == false)
 						&& (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false)) {
 					ok = false;
-					
+
 				}
 			}
 		}
@@ -389,22 +416,109 @@ public class Case {
 		} else if (ok == false) {
 			waterCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
 		}
-        theReply.addAssessmentCriterium(waterCriterium);
+		theReply.addAssessmentCriterium(waterCriterium);
+	}
+
+	
+	private void evaluateAssessmentPurpose(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
+		// AssessmentCriteria Water
+		AssessmentCriterium livingEnvironmentCriterium;
+		Risk aRisk;
+		int i;
+		boolean ok;
+		int aantalRisk;
+
+		ok = true; // tot tegendeel
+		aantalRisk = 0;
+		livingEnvironmentCriterium = new AssessmentCriterium();
+		livingEnvironmentCriterium.setDisplayName("Beoordeling op bestemming");
+		livingEnvironmentCriterium.setExemptionRequestAllowed(false);
+		livingEnvironmentCriterium
+				.setCriteriumCategory(AssessmentCriterium.tAssessmentCriteriumCategoryType.PURPOSE);
+
+		for (i = 0; i < this.myRisks.size(); i++) {
+			aRisk = this.myRisks.get(i);
+			if (aRisk.getMyAssessmentCriterium().equals(livingEnvironmentCriterium.getCriteriumCategory())) {
+				if (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false) {
+					aantalRisk = aantalRisk + 1;
+				}
+				if ((aRisk.getRiskValue().equals(Risk.tRiskClassificationType.NEUTRAL) == false)
+						&& (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false)) {
+					ok = false;
+
+				}
+			}
+		}
+
+		if (ok && (aantalRisk > 0)) {
+			livingEnvironmentCriterium
+					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.APPROVED);
+		} else if (ok && (aantalRisk == 0)) {
+			livingEnvironmentCriterium
+					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNKNOWN);
+		} else if (ok == false) {
+			livingEnvironmentCriterium
+					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
+		}
+		theReply.addAssessmentCriterium(livingEnvironmentCriterium);
+	}
+	
+	private void evaluateAssessmentLivingEnvironment(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
+		// AssessmentCriteria Water
+		AssessmentCriterium livingEnvironmentCriterium;
+		Risk aRisk;
+		int i;
+		boolean ok;
+		int aantalRisk;
+
+		ok = true; // tot tegendeel
+		aantalRisk = 0;
+		livingEnvironmentCriterium = new AssessmentCriterium();
+		livingEnvironmentCriterium.setDisplayName("Beoordeling op leef omgeving aspecten");
+		livingEnvironmentCriterium.setExemptionRequestAllowed(false);
+		livingEnvironmentCriterium
+				.setCriteriumCategory(AssessmentCriterium.tAssessmentCriteriumCategoryType.LIVING_ENVIRONMENT);
+
+		for (i = 0; i < this.myRisks.size(); i++) {
+			aRisk = this.myRisks.get(i);
+			if (aRisk.getMyAssessmentCriterium().equals(livingEnvironmentCriterium.getCriteriumCategory())) {
+				if (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false) {
+					aantalRisk = aantalRisk + 1;
+				}
+				if ((aRisk.getRiskValue().equals(Risk.tRiskClassificationType.NEUTRAL) == false)
+						&& (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false)) {
+					ok = false;
+
+				}
+			}
+		}
+
+		if (ok && (aantalRisk > 0)) {
+			livingEnvironmentCriterium
+					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.APPROVED);
+		} else if (ok && (aantalRisk == 0)) {
+			livingEnvironmentCriterium
+					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNKNOWN);
+		} else if (ok == false) {
+			livingEnvironmentCriterium
+					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
+		}
+		theReply.addAssessmentCriterium(livingEnvironmentCriterium);
 	}
 
 	public Risk getRiskByID(int riskRefID) {
 		Risk theRisk;
 		Risk aRisk;
 		int i;
-		
+
 		theRisk = null;
-		for (i = 0; i < this.myRisks.size() ; i++) {
+		for (i = 0; i < this.myRisks.size(); i++) {
 			aRisk = this.myRisks.get(i);
 			if (aRisk.getRefID() == riskRefID) {
 				theRisk = aRisk;
 			}
 		}
-		
+
 		return theRisk;
 	}
 

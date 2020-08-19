@@ -57,11 +57,15 @@ public class Risk {
 
 		risk_refID = risk_refID + 1;
 		this.setRefID(risk_refID);
-		explanation = "";
+	 this.clearExplanation();
 
 		// initialize proofs
 		this.myProofs = new ArrayList<Proof>();
 
+	}
+	
+	private void clearExplanation() {
+		this.explanation = "";
 	}
 
 	protected void addToExplanation(String aText) {
@@ -69,7 +73,7 @@ public class Risk {
 			this.explanation = aText;
 		}
 		else {
-			this.explanation.concat(" " + aText);
+			this.explanation = this.explanation + " " +  aText;
 		}
 		
 	}
@@ -84,32 +88,8 @@ public class Risk {
 		return policyReference;
 	}
 
-	public void createTestStub1(PolicyLibrary policyLib) {
-		Proof proofHoogte;
-		Proof proofBouwopvlak;
-
-		// hoogte
-		proofHoogte = policyLib.createProof_UNDER_MAX_HEIGHT(Proof.tProofClassificationType.UNDETERMINED);
-
-		// bouwopvlak
-
-		proofBouwopvlak = policyLib
-				.createProof_WITHIN_BOUNDARY_BUILD_SURFACE(Proof.tProofClassificationType.UNDETERMINED);
-		this.addProof(proofHoogte);
-		this.addProof(proofBouwopvlak);
-	}
 	
-	public void createTestStub2(PolicyLibrary policyLib, Case theCase, AssessRequestReply theReply ) {
-		Proof newProof;
-		Proof proofBouwopvlak;
 
-		
-		newProof = policyLib.createProof_SURFACE_FOUNDATION(Proof.tProofClassificationType.UNDETERMINED);
-         this.addProof(newProof);
-		
-		
-		
-	}
 	
 	
    @JsonIgnore
@@ -228,6 +208,7 @@ public class Risk {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
 						+ ". Een van onderliggende bewijzen zijn negatief en operand is AND");
+				this.clearExplanation();
 
 				break;
 			}
@@ -293,7 +274,7 @@ public class Risk {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
 						+ ". Een van onderliggende bewijzen is POSITIEF en operand is OR");
-
+				this.clearExplanation();
 				break;
 			}
 
@@ -318,6 +299,8 @@ public class Risk {
 		theServerGlobals.log("Bron: " + this.getPolicyReference());
 		theServerGlobals.log("");
 
+		
+		this.clearExplanation();
 		// Evalueer strategie
 		if (this.getOperand().equals(Risk.tOperandType.AND)) {
 			this.evalProofasAND(theServerGlobals, theCase, theReply,  exhaustive);

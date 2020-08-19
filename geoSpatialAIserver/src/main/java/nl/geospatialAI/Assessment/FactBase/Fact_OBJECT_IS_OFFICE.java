@@ -6,63 +6,58 @@ import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
-public class Fact_OBJECT_IS_HOUSE extends Fact {
-    
+public class Fact_OBJECT_IS_OFFICE extends Fact {
 	@Override
 	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
 			int level, boolean exhaustive) {
 		theServerGlobals.log("Evaluatie van feit :" + this.getDisplayName());
 
 		this.resetUsedDataPoints();
-         	this.evaluateValue(theServerGlobals, theCase, theReply, level, exhaustive);
-        
+		this.evaluateValue(theServerGlobals, theCase, theReply, level, exhaustive);
+
 	}
-	
-	
+
 	private void evaluateValue(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level,
 			boolean exhaustive) {
 		DataPoint dp_Purpose_HM_OBJECT;
-		
 
 		String purposeValue;
-        boolean isHouse;
-        boolean valueKnown;
-        
-        //init
-        isHouse = false; 
-        valueKnown = false;
-        purposeValue = "";
+		boolean isOffice;
+		boolean valueKnown;
 
-        dp_Purpose_HM_OBJECT = theCase.getCaseDataPointByType(theServerGlobals, theReply,
+		// init
+		isOffice = false;
+		valueKnown = false;
+		purposeValue = "";
+
+		dp_Purpose_HM_OBJECT = theCase.getCaseDataPointByType(theServerGlobals, theReply,
 				DataPoint.DP_Type.PURPOSE_HM_OBJECT);
 
 		if (dp_Purpose_HM_OBJECT.hasValue()) {
 			this.recordUsedDataPoint(dp_Purpose_HM_OBJECT);
 			purposeValue = dp_Purpose_HM_OBJECT.getConvertedValueString();
-		
-			if (purposeValue.equals("WONEN") ){
-				isHouse = true;
+
+			if (purposeValue.equals("KANTOORACTIVITEITEN")) {
+				isOffice = true;
 				valueKnown = true;
-				this.addToExplanation("Activiteit WONEN  is onderdeel van doel object.");
+				this.addToExplanation("Activiteit KANTOORACTIVITEITEN  is onderdeel van doel object.");
 			} else {
-				isHouse = false;
+				isOffice = false;
 				valueKnown = true;
-				this.addToExplanation("Activiteit WONEN is geen onderdeel van doel object");
-			} 
-				
+				this.addToExplanation("Activiteit KANTOORACTIVITEITEN is geen onderdeel van doel object");
+			}
+
 		}
-		
+
 		if (valueKnown) {
-			if (isHouse == true) {
-				 this.setFactResult(Fact.tFactClassificationType.TRUE);
+			if (isOffice == true) {
+				this.setFactResult(Fact.tFactClassificationType.TRUE);
+			} else if (isOffice == false) {
+				this.setFactResult(Fact.tFactClassificationType.FALSE);
 			}
-			else
-			if (isHouse == false) {
-				 this.setFactResult(Fact.tFactClassificationType.FALSE);
-			}
-			
+
 		}
-		
+
 	}
 
 }

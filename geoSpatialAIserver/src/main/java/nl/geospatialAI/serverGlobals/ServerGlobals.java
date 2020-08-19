@@ -1,5 +1,8 @@
 package nl.geospatialAI.serverGlobals;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Case.CasesDAO;
 
@@ -32,6 +35,14 @@ public class ServerGlobals {
 
 	}
 
+	public  double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+
+	    BigDecimal bd = BigDecimal.valueOf(value);
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
+	}
+	
 	public t_LogLevel getLogLevel() {
 		return logLevel;
 	}

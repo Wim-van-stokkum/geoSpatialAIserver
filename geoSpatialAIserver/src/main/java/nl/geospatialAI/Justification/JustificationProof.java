@@ -12,6 +12,7 @@ public class JustificationProof {
 
 	public int refID;
 	public tProofCategoryType proofCategory;
+
 	public String policyReference;
 	public String displayName;
 	public tProofClassificationType proofResult;
@@ -28,6 +29,8 @@ public class JustificationProof {
 		this.proofResult = aProof.getProofResult();
 		this.explanation = aProof.explainYourSelf();
 		this.operandApplied = aProof.getOperand();
+		
+
 		underlyingFacts = new ArrayList<JustificationFact>();
 	}
 

@@ -1,9 +1,13 @@
 package nl.geospatialAI.Assessment;
 
+import nl.geospatialAI.Assessment.FactBase.Fact_HOUSE_HEIGHT_WITHIN_NORM;
+import nl.geospatialAI.Assessment.FactBase.Fact_OBJECT_IS_COMMERCIAL_BUILDING;
 import nl.geospatialAI.Assessment.FactBase.Fact_OBJECT_IS_HOUSE;
+import nl.geospatialAI.Assessment.FactBase.Fact_OBJECT_IS_OFFICE;
+import nl.geospatialAI.Assessment.FactBase.Fact_OFFICE_HEIGHT_WITHIN_NORM;
 import nl.geospatialAI.Assessment.FactBase.Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM;
+import nl.geospatialAI.Assessment.FactBase.Fact_PROFESSION_CATEGORY_B;
 import nl.geospatialAI.Case.Case;
-import nl.geospatialAI.DataPoints.AllowedValue;
 import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.DataPoints.derivedDataPoints.DataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE;
 import nl.geospatialAI.assessObjects.HumanMadeObject;
@@ -40,14 +44,95 @@ public class PolicyLibrary {
 		newRisk.setDisplayName("Risico: Water doorlatendheid");
 
 		newRisk.setPolicyReference("Artikel 12.1, bestemmingsplan oost");
-        newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.WATER);
+		newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.WATER);
 		myProof = this.createProof_SURFACE_WATER_NON_PERM_ACCEPTABLE(Proof.tProofClassificationType.UNDETERMINED);
 		newRisk.addProof(myProof);
 
 		return newRisk;
 	}
 
+	public Risk createRisk_HORIZON_POLUTION() {
+		Risk newRisk;
+		Proof myProof;
+		Proof subProof;
+
+		newRisk = new Risk();
+		newRisk.setRiskCategory(Risk.tRiskCategoryType.ENVIRONMENTAL);
+		newRisk.setDisplayName("Risico: horizon vervuiling");
+
+		newRisk.setPolicyReference("Artikel 14.2, bestemmingsplan oost");
+		newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.LIVING_ENVIRONMENT);
+		// myProof =
+		// this.createProof_UNDER_MAX_HEIGHT(Proof.tProofClassificationType.UNDETERMINED);
+		// newRisk.addProof(myProof);
+
+		// TO DO : bring under proof MAX HEIGTH WITH SUBPROOF: justifiy-> subproofs code
+
+		// temp
+		subProof = this.createProof_UNDER_MAX_HEIGHT_HOUSE(Proof.tProofClassificationType.UNDETERMINED);
+		newRisk.addProof(subProof);
+		subProof = this.createProof_UNDER_MAX_HEIGHT_OFFICE(Proof.tProofClassificationType.UNDETERMINED);
+		newRisk.addProof(subProof);
+		newRisk.evaluateAsOr();
+
+		return newRisk;
+	}
+
+	public Risk createRisk_COMMERCIAL_USE() {
+		Risk newRisk;
+		Proof myProof;
+		Proof subProof;
+
+		newRisk = new Risk();
+		newRisk.setRiskCategory(Risk.tRiskCategoryType.PURPOSE);
+		newRisk.setDisplayName("Risico: onverantwoord commercieel gebruik");
+
+		newRisk.setPolicyReference("Artikel 12.2, bestemmingsplan oost");
+		newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.PURPOSE);
+
+		// temp
+		subProof = this.createProof_OBJECT_MEANT_FOR_COMMERCIAL_USE(Proof.tProofClassificationType.UNDETERMINED);
+		newRisk.addProof(subProof);
+		subProof = this.createProof_ALLOWED_PROFFESION_AT_HOUSE(Proof.tProofClassificationType.UNDETERMINED);
+		newRisk.addProof(subProof);
+		newRisk.evaluateAsOr();
+
+		return newRisk;
+	}
+
 	// PROOF LIBRARY
+	public Proof createProof_OBJECT_MEANT_FOR_COMMERCIAL_USE(Proof.tProofClassificationType initValue) {
+		Proof newProof;
+		Fact newFact;
+
+		newProof = new Proof();
+		newProof.setProofCategory(Proof.tProofCategoryType.OBJECT_MEANT_FOR_COMMERCIAL_USE);
+		newProof.setDisplayName("Bewijs: object is bestemd voor commerciele activiteiten");
+
+		newProof.setPolicyReference("Artikel 12.25.b, bestemmingsplan oost");
+
+		newFact = createFact_OBJECT_IS_COMMERCIAL_BUILDING(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+		return newProof;
+	}
+
+	public Proof createProof_ALLOWED_PROFFESION_AT_HOUSE(Proof.tProofClassificationType initValue) {
+		Proof newProof;
+		Fact newFact;
+
+		newProof = new Proof();
+		newProof.setProofCategory(Proof.tProofCategoryType.ALLOWED_PROFFESION_AT_HOUSE);
+		newProof.setDisplayName("Bewijs: beroep aan huis is toelaatbaar");
+
+		newProof.setPolicyReference("Artikel 12.5.d, bestemmingsplan oost");
+
+		newFact = createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+		newFact = createFact_PROFESSION_CATEGORY_B(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+		return newProof;
+	}
+
 	public Proof createProof_SURFACE_WATER_NON_PERM_ACCEPTABLE(Proof.tProofClassificationType initValue) {
 		Proof newProof;
 		Fact newFact;
@@ -63,16 +148,47 @@ public class PolicyLibrary {
 		return newProof;
 	}
 
-	public Proof createProof_UNDER_MAX_HEIGHT(Proof.tProofClassificationType initValue) {
+	public Proof createProof_UNDER_MAX_HEIGHT_HOUSE(Proof.tProofClassificationType initValue) {
 		Proof newProof;
+		Fact newFact;
 
 		newProof = new Proof();
 		newProof.setProofCategory(Proof.tProofCategoryType.UNDER_MAX_HEIGHT);
-		newProof.setDisplayName("Bewijs: De hoogte vanaf maaiveld tot nok dient binnen de grenzen te vallen");
+		newProof.setDisplayName("Bewijs: De maximale hoogte vanaf maaiveld valt binnen norm voor type Woning");
 		if (initValue.equals(Proof.tProofClassificationType.UNDETERMINED) == false) {
 			newProof.setProofResult(initValue);
 		}
 		newProof.setPolicyReference("Artikel 12.1, bestemmingsplan oost");
+
+		newFact = this.createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+
+		newFact = this.createFact_HOUSE_HEIGHT_WITHIN_NORM(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+		newProof.evaluateAsAND();
+
+		return newProof;
+	}
+
+	public Proof createProof_UNDER_MAX_HEIGHT_OFFICE(Proof.tProofClassificationType initValue) {
+		Proof newProof;
+		Fact newFact;
+
+		newProof = new Proof();
+		newProof.setProofCategory(Proof.tProofCategoryType.UNDER_MAX_HEIGHT);
+		newProof.setDisplayName("Bewijs: De maximale hoogte vanaf maaiveld valt binnen norm voor type Kantoor");
+		if (initValue.equals(Proof.tProofClassificationType.UNDETERMINED) == false) {
+			newProof.setProofResult(initValue);
+		}
+		newProof.setPolicyReference("Artikel 12.4, bestemmingsplan oost");
+
+		newFact = this.createFact_OBJECT_TYPE_IS_OFFICE(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+
+		newFact = this.createFact_OFFICE_HEIGHT_WITHIN_NORM(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+		newProof.evaluateAsAND();
+
 		return newProof;
 	}
 
@@ -170,26 +286,87 @@ public class PolicyLibrary {
 
 		newFact = new Fact_OBJECT_IS_HOUSE();
 		newFact.setFactType(Fact.tFactType.OBJECT_TYPE_IS_HOUSE);
-		newFact.setDisplayName("Feit: gebouw is een huis");
+		newFact.setDisplayName("Feit: gebouw gebruikt als woning");
 		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
 			newFact.setFactResult(initValue);
 		}
-		newFact.setFactResult(Fact.tFactClassificationType.TRUE);
+
+		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		return newFact;
+
+	}
+
+	public Fact_HOUSE_HEIGHT_WITHIN_NORM createFact_HOUSE_HEIGHT_WITHIN_NORM(Fact.tFactClassificationType initValue) {
+		Fact_HOUSE_HEIGHT_WITHIN_NORM newFact;
+
+		newFact = new Fact_HOUSE_HEIGHT_WITHIN_NORM();
+		newFact.setFactType(Fact.tFactType.HOUSE_HEIGHT_WITHIN_NORM);
+		newFact.setDisplayName("Feit: woning hoogte valt binnen normen beleid.");
+		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
+			newFact.setFactResult(initValue);
+		}
+
+		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		return newFact;
+
+	}
+
+	public Fact createFact_OBJECT_TYPE_IS_OFFICE(Fact.tFactClassificationType initValue) {
+		Fact_OBJECT_IS_OFFICE newFact;
+
+		newFact = new Fact_OBJECT_IS_OFFICE();
+		newFact.setFactType(Fact.tFactType.OBJECT_TYPE_IS_OFFICE);
+		newFact.setDisplayName("Feit: gebouw gebruikt voor kantooractiviteiten");
+		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
+			newFact.setFactResult(initValue);
+		}
+
+		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		return newFact;
+
+	}
+
+	public Fact_OFFICE_HEIGHT_WITHIN_NORM createFact_OFFICE_HEIGHT_WITHIN_NORM(Fact.tFactClassificationType initValue) {
+		Fact_OFFICE_HEIGHT_WITHIN_NORM newFact;
+
+		newFact = new Fact_OFFICE_HEIGHT_WITHIN_NORM();
+		newFact.setFactType(Fact.tFactType.OFFICE_HEIGHT_WITHIN_NORM);
+		newFact.setDisplayName("Feit: kantoorgebouw hoogte valt binnen normen beleid.");
+		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
+			newFact.setFactResult(initValue);
+		}
+
+		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		return newFact;
+
+	}
+
+	public Fact_OBJECT_IS_COMMERCIAL_BUILDING createFact_OBJECT_IS_COMMERCIAL_BUILDING(
+			Fact.tFactClassificationType initValue) {
+		Fact_OBJECT_IS_COMMERCIAL_BUILDING newFact;
+
+		newFact = new Fact_OBJECT_IS_COMMERCIAL_BUILDING();
+		newFact.setFactType(Fact.tFactType.OBJECT_IS_COMMERCIAL_BUILDING);
+		newFact.setDisplayName("Feit: object is van nature een commercieel gebouw.");
+		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
+			newFact.setFactResult(initValue);
+		}
+
 		newFact.setPolicyReference("Definities, bestemmingsplan oost");
 		return newFact;
 
 	}
 
 	public Fact createFact_PROFESSION_CATEGORY_B(Fact.tFactClassificationType initValue) {
-		Fact newFact;
+		Fact_PROFESSION_CATEGORY_B newFact;
 
-		newFact = new Fact();
+		newFact = new Fact_PROFESSION_CATEGORY_B();
 		newFact.setFactType(Fact.tFactType.PROFESSION_CATEGORY_B);
 		newFact.setDisplayName("Feit: beroep valt in category B");
 		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
 			newFact.setFactResult(initValue);
 		}
-		newFact.setFactResult(Fact.tFactClassificationType.TRUE);
+
 		newFact.setPolicyReference("Definities, bestemmingsplan oost");
 		return newFact;
 
@@ -198,12 +375,24 @@ public class PolicyLibrary {
 	// DATAPOINTS
 	// =================================================================================================================================
 
-	public DataPoint createDataPoint_BIM_PURPOSE_HM_OBJECT(Case theCase, ServerGlobals theServiceGlobals,
+	public DataPoint createDataPoint_PROFESSION_AT_HOME(Case theCase, ServerGlobals theServiceGlobals,
 			AssessRequestReply theReply) {
 
 		DataPoint newDP;
 
-		newDP = new DataPoint(DataPoint.DP_Type.BIM_PURPOSE_HM_OBJECT);
+		newDP = new DataPoint(DataPoint.DP_Type.PROFESSION_AT_HOME);
+
+		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
+		return newDP;
+
+	}
+
+	public DataPoint createDataPoint_PURPOSE_HM_OBJECT(Case theCase, ServerGlobals theServiceGlobals,
+			AssessRequestReply theReply) {
+
+		DataPoint newDP;
+
+		newDP = new DataPoint(DataPoint.DP_Type.PURPOSE_HM_OBJECT);
 
 		// BIM
 		if (theCase.hasBIM()) {
@@ -232,35 +421,43 @@ public class PolicyLibrary {
 
 		theHM = theCase.getTheHumanMadeObject();
 		if (theHM != null) {
-			if (theHM.getTheHumanMadeObjectType().equals(HumanMadeObject.tHumanMadeObjectType.house)) {
-				newDP.setValue("WOONGEBOUW");
-				newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
-			} else if (theHM.getTheHumanMadeObjectType().equals(HumanMadeObject.tHumanMadeObjectType.officeBuilding)) {
-				newDP.setValue("KANTOORGEBOUW");
-				newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
-			} else if (theHM.getTheHumanMadeObjectType()
-					.equals(HumanMadeObject.tHumanMadeObjectType.cateringBuilding)) {
-				newDP.setValue("HORECAGEBOUW");
-				newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
-			} else if (theHM.getTheHumanMadeObjectType().equals(HumanMadeObject.tHumanMadeObjectType.tradeBuilding)) {
-				newDP.setValue("HANDELSGEBOUW");
-				newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+
+			if (theHM.getTheHumanMadeObjectType() != null) {
+				if (theHM.getTheHumanMadeObjectType().equals(HumanMadeObject.tHumanMadeObjectType.house)) {
+					newDP.setValue("WOONGEBOUW");
+					newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+				} else if (theHM.getTheHumanMadeObjectType()
+						.equals(HumanMadeObject.tHumanMadeObjectType.officeBuilding)) {
+					newDP.setValue("KANTOORGEBOUW");
+					newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+				} else if (theHM.getTheHumanMadeObjectType()
+						.equals(HumanMadeObject.tHumanMadeObjectType.cateringBuilding)) {
+					newDP.setValue("HORECAGEBOUW");
+					newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+				} else if (theHM.getTheHumanMadeObjectType()
+						.equals(HumanMadeObject.tHumanMadeObjectType.tradeBuilding)) {
+					newDP.setValue("HANDELSGEBOUW");
+					newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+				}
+				if (theHM.getTheHumanMadeObjectType().equals(HumanMadeObject.tHumanMadeObjectType.commercialBuilding)) {
+					newDP.setValue("HANDELSGEBOUW");
+					newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+				}
 			}
-			if (theHM.getTheHumanMadeObjectType().equals(HumanMadeObject.tHumanMadeObjectType.commercialBuilding)) {
-				newDP.setValue("HANDELSGEBOUW");
-				newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
+			else {
+				// BIM
+				if (theCase.hasBIM()) {
+
+					newDP.setValue(theCase.theBIMfile.getGebouwType().toString());
+					newDP.setDatapointSource(DataPoint.DP_source.DESIGN_FILE);
+					newDP.setAskable(false);
+
+				}
 			}
 
 		}
 
-		// BIM
-		if (theCase.hasBIM()) {
-
-			newDP.setValue(theCase.theBIMfile.getGebouwType().toString());
-			newDP.setDatapointSource(DataPoint.DP_source.DESIGN_FILE);
-			newDP.setAskable(false);
-
-		}
+	
 		return newDP;
 	}
 
@@ -271,7 +468,7 @@ public class PolicyLibrary {
 
 		newDP = new DataPoint(DataPoint.DP_Type.MEASUREDHEIGHT);
 		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
-		
+
 		// BIM
 		if (theCase.hasBIM()) {
 			bimHeight = theCase.theBIMfile.getObjectHeight();
@@ -288,7 +485,6 @@ public class PolicyLibrary {
 		DataPoint newDP;
 
 		newDP = new DataPoint(DataPoint.DP_Type.BIMFILEURL);
-	
 
 		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
 		return newDP;
@@ -299,7 +495,7 @@ public class PolicyLibrary {
 		DataPoint newDP;
 
 		newDP = new DataPoint(DataPoint.DP_Type.MAX_WIDTH_OBJECT);
-		
+
 		// BIM
 		if (theCase.hasBIM()) {
 
@@ -317,7 +513,6 @@ public class PolicyLibrary {
 		DataPoint newDP;
 
 		newDP = new DataPoint(DataPoint.DP_Type.MAX_LENGTH_OBJECT);
-		
 
 		// BIM
 		if (theCase.hasBIM()) {
@@ -336,7 +531,6 @@ public class PolicyLibrary {
 		DataPoint newDP;
 
 		newDP = new DataPoint(DataPoint.DP_Type.SURFACE_CALCULATED_OBJECT);
-	
 
 		// BIM
 		if (theCase.hasBIM()) {
@@ -395,10 +589,9 @@ public class PolicyLibrary {
 	public DataPoint createDataPoint_BUSINESSACTIVITIES(Case theCase, ServerGlobals theServiceGlobals,
 			AssessRequestReply theReply) {
 		DataPoint newDP;
-		AllowedValue newValue;
 
 		newDP = new DataPoint(DataPoint.DP_Type.BUSINESSACTIVITIES);
-	
+
 		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
 
 		return newDP;

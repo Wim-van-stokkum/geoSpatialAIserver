@@ -15,7 +15,7 @@ public class Proof {
 
 	public enum tProofCategoryType {
 		UNDER_MAX_HEIGHT, ALLOWED_PROFFESION_AT_HOUSE, WITHIN_BOUNDARY_BUILD_SURFACE, SURFACE_FOUNDATION,
-		SURFACE_ADDITIONAL_BUILDINGS, SURFACE_WATER_NON_PERM_ACCEPTABLE
+		SURFACE_ADDITIONAL_BUILDINGS, SURFACE_WATER_NON_PERM_ACCEPTABLE, OBJECT_MEANT_FOR_COMMERCIAL_USE
 
 		// to be defined in use case
 	}
@@ -30,8 +30,6 @@ public class Proof {
 
 	static int proof_refID = 500;
 	private int refID;
-
-	
 
 	private tProofCategoryType proofCategory;
 
@@ -57,22 +55,22 @@ public class Proof {
 	}
 
 	protected void addToExplanation(String aText) {
+		ServerGlobals.getInstance().log(
+				"DEBUG: ADD EXPLANATION PROOF:" + this.explanation + " add " + aText + "[" + this.explanation.length());
 		if (this.explanation.length() == 0) {
 			this.explanation = aText;
-		}
-		else {
-			this.explanation.concat(" " + aText);
+		} else {
+			this.explanation = this.explanation + " " +  aText;
 		}
 		
-	}
 
+	}
 
 	@JsonIgnore
 	public String explainYourSelf() {
 		return this.explanation;
 	}
-	
-	
+
 	public int getRefID() {
 		return refID;
 	}
@@ -80,7 +78,7 @@ public class Proof {
 	public void setRefID(int refID) {
 		this.refID = refID;
 	}
-	
+
 	public void setProofCategory(tProofCategoryType proofCategory) {
 		this.proofCategory = proofCategory;
 	}
@@ -108,8 +106,7 @@ public class Proof {
 
 		this.mySubProofs = new ArrayList<Proof>();
 		this.myFacts = new ArrayList<Fact>();
-        this.explanation = "";
-		
+         
 		System.out.println("CREATING PROOF [" + this.getRefID() + "]");
 		System.out.println("----------------------------------------");
 		System.out.println();
@@ -146,31 +143,35 @@ public class Proof {
 
 	// ASSESS
 
-	public tProofClassificationType assessProof(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , int level, boolean exhaustive) {
+	public tProofClassificationType assessProof(ServerGlobals theServerGlobals, Case theCase,
+			AssessRequestReply theReply, int level, boolean exhaustive) {
 		tProofClassificationType resultAssessmentSubProof;
 		tProofClassificationType resultFacts;
 
-		
 		theServerGlobals.log("BEOORDEEL BEWIJS  [level: " + level + "]");
 		theServerGlobals.log("===========");
 		theServerGlobals.log("Proof: " + this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("");
 
-		// Assess sub proof (if Any)
 		
+		this.clearMyExplanation();
+		
+		// Assess sub proof (if Any)
+
+
 		resultFacts = Proof.tProofClassificationType.UNDETERMINED;
 		resultAssessmentSubProof = Proof.tProofClassificationType.UNDETERMINED;
-		
+
 		if (this.mySubProofs.size() > 0) {
-			resultAssessmentSubProof = this.AssessSubProofs(theServerGlobals, theCase, theReply,  level, exhaustive);
+			resultAssessmentSubProof = this.AssessSubProofs(theServerGlobals, theCase, theReply, level, exhaustive);
 		}
 
 		// detemine sub facts (if any)
 		if (this.myFacts.size() > 0) {
-			resultFacts = this.AssessFacts(theServerGlobals, theCase, theReply,  level, exhaustive);
-			theServerGlobals.log("RECEIVING RESULTFACTS " +resultFacts )  ;
-		
+			resultFacts = this.AssessFacts(theServerGlobals, theCase, theReply, level, exhaustive);
+			theServerGlobals.log("RECEIVING RESULTFACTS " + resultFacts);
+
 		}
 
 		// to do overall conclusions over sub proofs and facts
@@ -251,7 +252,13 @@ public class Proof {
 		return (this.getProofResult());
 	}
 
-	private tProofClassificationType AssessSubProofs(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , int level, boolean exhaustive) {
+	private void clearMyExplanation() {
+        this.explanation = "";
+		
+	}
+
+	private tProofClassificationType AssessSubProofs(ServerGlobals theServerGlobals, Case theCase,
+			AssessRequestReply theReply, int level, boolean exhaustive) {
 		// determine sub proof (if any)
 
 		tProofClassificationType conclusion;
@@ -273,7 +280,8 @@ public class Proof {
 		return conclusion;
 	}
 
-	private tProofClassificationType AssessFacts(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
+	private tProofClassificationType AssessFacts(ServerGlobals theServerGlobals, Case theCase,
+			AssessRequestReply theReply, int level, boolean exhaustive) {
 		// determine facts
 
 		tProofClassificationType conclusion;
@@ -284,16 +292,16 @@ public class Proof {
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("Operand: " + this.getOperand());
 		theServerGlobals.log("");
-           
+
 		if (this.getOperand().equals(Proof.tOperandType.AND)) {
 			this.evalFactsasAND(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 		} else if (this.getOperand().equals(Proof.tOperandType.OR)) {
 			this.evalFactsasOR(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 		}
-;
+		;
 		// Conclusion
 		conclusion = Proof.tProofClassificationType.UNDETERMINED;
-		theServerGlobals.log("KOM NA DE AND " + this.subFactOverallResult );
+
 		if (this.subFactOverallResult.equals(Fact.tFactClassificationType.TRUE)) {
 			conclusion = Proof.tProofClassificationType.POSITIVE;
 		} else if (this.subFactOverallResult.equals(Fact.tFactClassificationType.FALSE)) {
@@ -305,15 +313,16 @@ public class Proof {
 		return conclusion;
 	}
 
-	private void evalProofasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive, int level) {
+	private void evalProofasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive, int level) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
 		// Proof all underlying proofs
 		for (i = 0; i < this.mySubProofs.size(); i++) {
-			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply,level, exhaustive);
+			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply, level, exhaustive);
 			this.addToExplanation(mySubProofs.get(i).explainYourSelf());
-			
+
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.subProofOverallResult = Proof.tProofClassificationType.NEGATIVE;
 				aValueSet = true;
@@ -367,14 +376,15 @@ public class Proof {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van gecombineerd bewijs " + this.refID
 						+ ". Een van onderliggende bewijzen zijn negatief en operand is AND");
-
+				this.clearExplanation();
 				break;
 			}
 
 		}
 	}
 
-	private void evalProofasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive, int level) {
+	private void evalProofasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive, int level) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 
@@ -382,7 +392,7 @@ public class Proof {
 		for (i = 0; i < this.mySubProofs.size(); i++) {
 			aProofResult = mySubProofs.get(i).assessProof(theServerGlobals, theCase, theReply, level, exhaustive);
 			this.addToExplanation(mySubProofs.get(i).explainYourSelf());
-			
+
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
 				// Negative stays negative
@@ -434,7 +444,7 @@ public class Proof {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van combinatie bewijs " + this.refID
 						+ ". Een van onderliggende subbewijzen is POSITIEF en operand is OR");
-
+				this.clearExplanation();
 				break;
 			}
 
@@ -443,7 +453,8 @@ public class Proof {
 
 	// FACTS
 
-	private void evalFactsasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
+	private void evalFactsasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
 
@@ -454,7 +465,7 @@ public class Proof {
 			aFactResult = myFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
 			theServerGlobals.log("Na Aanroep AssessFact" + aFactResult);
 			this.addToExplanation(myFacts.get(i).explainYourSelf());
-			
+
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				this.subFactOverallResult = Fact.tFactClassificationType.FALSE;
 				aValueSet = true;
@@ -508,14 +519,15 @@ public class Proof {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van feiten " + this.refID
 						+ ". Een van onderliggende feiten zijn negatief en operand is AND");
-
+				this.clearExplanation();
 				break;
 			}
 
 		}
 	}
 
-	private void evalFactsasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
+	private void evalFactsasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
 
@@ -523,7 +535,7 @@ public class Proof {
 		for (i = 0; i < this.mySubProofs.size(); i++) {
 			aFactResult = this.myFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
 			this.addToExplanation(myFacts.get(i).explainYourSelf());
-			
+
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				// Positive stay positive
 				// Negative stays negative
@@ -574,31 +586,45 @@ public class Proof {
 
 				theServerGlobals.log("Stop voortijdig beoordeling van feiten " + this.refID
 						+ ". Een van onderliggende feiten is TRUE en operand is OR");
-
+				this.clearExplanation();
 				break;
 			}
 
 		}
 	}
 
+	private void clearExplanation() {
+		// TODO Auto-generated method stub
+		this.explanation = "";
+	}
+
 	public void justifyProof(ServerGlobals theServerGlobals, Case correspondingCase, Risk aRisk,
 			JustificationRisk justificationRisk) {
-		
+
 		int i;
 		Fact aFact;
-		
-		
-		 JustificationProof myProofJustification;
-		 myProofJustification = new JustificationProof(this);
-		 justificationRisk.addProofJustification(myProofJustification);
-		 
-		 for (i = 0 ; i < this.myFacts.size(); i++ ) {
-			 aFact = this.myFacts.get(i);
-			 aFact.justifyFact(theServerGlobals, correspondingCase, myProofJustification);
-		 }
-		 
-		 
-		
+
+		JustificationProof myProofJustification;
+		myProofJustification = new JustificationProof(this);
+		justificationRisk.addProofJustification(myProofJustification);
+
+		for (i = 0; i < this.myFacts.size(); i++) {
+			aFact = this.myFacts.get(i);
+			aFact.justifyFact(theServerGlobals, correspondingCase, myProofJustification);
+		}
+
+	}
+
+	public void evaluateAsAND() {
+		// TODO Auto-generated method stub
+		this.myOperand = Proof.tOperandType.AND;
+
+	}
+
+	public void evaluateAsOR() {
+		// TODO Auto-generated method stub
+		this.myOperand = Proof.tOperandType.OR;
+
 	}
 
 }

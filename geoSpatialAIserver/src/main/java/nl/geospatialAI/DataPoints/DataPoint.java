@@ -21,7 +21,7 @@ public class DataPoint {
 
 		BIMFILEURL,
 
-		BIM_PURPOSE_HM_OBJECT, BUILDINGCATEGORY, DESIGN_HAS_GARDEN,
+		PURPOSE_HM_OBJECT, BUILDINGCATEGORY, DESIGN_HAS_GARDEN,
 
 		MAX_LENGTH_DESTINATIONPANE, MAX_WIDTH_DESTINATIONPANE, SURFACE_CALCULATED_DESTINATIONPANE,
 
@@ -29,7 +29,8 @@ public class DataPoint {
 
 		MAX_WIDTH_GARDEN, MAX_LENGTH_GARDEN, SURFACE_CALCULATED_GARDEN,
 
-		SURFACE_TILES_GARDEN, PERC_WATER_PERM_GARDEN, TOTAL_SURFACE_WATER_NON_PERMABLE
+		SURFACE_TILES_GARDEN, PERC_WATER_PERM_GARDEN, TOTAL_SURFACE_WATER_NON_PERMABLE,
+		PROFESSION_AT_HOME
 
 		// to de defined or extented in pilot
 
@@ -418,8 +419,9 @@ public class DataPoint {
 		ServerGlobals.getInstance().log(this.dataPointType.toString());
 		ServerGlobals.getInstance().log(this.dataType.toString());
 		if (this.getDataType().equals(DataPoint.DP_dataType.TEXT)
-				|| this.getDataType().equals(DataPoint.DP_dataType.FILE_URL)) {
-			ServerGlobals.getInstance().log("KIPP");
+				|| this.getDataType().equals(DataPoint.DP_dataType.FILE_URL)
+				||  this.getDataType().equals(DataPoint.DP_dataType.VALUESELECTION)) {
+	
 
 			if (this.hasValue()) {
 				val = this.getValue();
@@ -492,14 +494,14 @@ public class DataPoint {
 		newDP.addAllowedValue(newValue);
 	}
 
-	private void initDataPoint_BIM_PURPOSE_HM_OBJECT() {
+	private void initDataPoint_PURPOSE_HM_OBJECT() {
 		DataPoint newDP;
 		AllowedValue newValue;
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.PURPOSE);
 		newDP.setDataType(DataPoint.DP_dataType.VALUESELECTION);
-		newDP.setDataPointType(DataPoint.DP_Type.BIM_PURPOSE_HM_OBJECT);
+		newDP.setDataPointType(DataPoint.DP_Type.PURPOSE_HM_OBJECT);
 
 		newDP.setExplanationText("Nodig om type woning af te leiden");
 		newDP.setQuestionText("Welke type activiteit wordt gepland for dit object?");
@@ -533,7 +535,7 @@ public class DataPoint {
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataPointType(DataPoint.DP_Type.BUILDINGCATEGORY);
 		newDP.setDataType(DataPoint.DP_dataType.VALUESELECTION);
-		newDP.setDefaultValue("WONING");
+		newDP.setDefaultValue("WOONGEBOUW");
 		newDP.setExplanationText("Object bestemd te dienen als hoofdverblijf voor wonen");
 		newDP.setQuestionText("Welk type heeft het the plaatsen hoofdgebouw?");
 
@@ -675,7 +677,7 @@ public class DataPoint {
 		newDP.setDefaultValue("false");
 
 		newDP.setQuestionText("Wat is de aard van uw bedrijfsactiviteiten?");
-		newDP.setExplanationText("Wij vragen dit om het effect op de wijk vast te kunnen stellen");
+		newDP.setExplanationText("Wij vragen dit om het effect/risico op de wijk vast te kunnen stellen");
 
 		newValue = new AllowedValue();
 		newValue.setCode("WEBSHOP");
@@ -688,8 +690,8 @@ public class DataPoint {
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
-		newValue.setCode("ADULT");
-		newValue.setDisplayText("Sexwerk");
+		newValue.setCode("EDUCATION");
+		newValue.setDisplayText("Eductatie");
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
@@ -803,12 +805,65 @@ public class DataPoint {
 		newDP.setExplanationText("Nodig om te beoordelen of deze binnen normen valt");
 
 	}
+	
+
+	private void initDataPoint_PROFESSION_AT_HOME() {
+		DataPoint newDP;
+		AllowedValue newValue;
+		
+		newDP = this;
+		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
+		newDP.setDataType(DataPoint.DP_dataType.VALUESELECTION);
+		newDP.setDataPointType(DataPoint.DP_Type.PROFESSION_AT_HOME);
+		newDP.setDefaultValue("OTHER");
+		newDP.setAskable(true);
+
+		newDP.setQuestionText("Beroep uitgeoefend aan huis");
+		newDP.setExplanationText("Nodig om te beoordelen of dit beroep risico's met zich mee brengt voor de omgeving");
+
+		
+		newValue = new AllowedValue();
+		newValue.setCode("CONSULTANCY");
+		newValue.setDisplayText("Consultancy");
+		newDP.addAllowedValue(newValue);
+
+		newValue = new AllowedValue();
+		newValue.setCode("COACHING");
+		newValue.setDisplayText("Coaching");
+		newDP.addAllowedValue(newValue);
+
+		newValue = new AllowedValue();
+		newValue.setCode("WEBSHOP");
+		newValue.setDisplayText("Webshop");
+		newDP.addAllowedValue(newValue);
+
+		newValue = new AllowedValue();
+		newValue.setCode("ACCOUNTANT");
+		newValue.setDisplayText("Accountancy");
+		newDP.addAllowedValue(newValue);
+
+		newValue = new AllowedValue();
+		newValue.setCode("DENTIST");
+		newValue.setDisplayText("Tandarts");
+		newDP.addAllowedValue(newValue);
+		
+		newValue = new AllowedValue();
+		newValue.setCode("BARBER");
+		newValue.setDisplayText("Kapper");
+		newDP.addAllowedValue(newValue);
+		
+		newValue = new AllowedValue();
+		newValue.setCode("OTHER");
+		newValue.setDisplayText("Ander beroep");
+		newDP.addAllowedValue(newValue);
+	}
+
 
 	public void initDataPoint(DataPoint.DP_Type aDPtype) {
 		if (aDPtype.equals(DataPoint.DP_Type.BIMFILEURL)) {
 			this.initDataPoint_BIMFILEURL();
-		} else if (aDPtype.equals(DataPoint.DP_Type.BIM_PURPOSE_HM_OBJECT)) {
-			this.initDataPoint_BIM_PURPOSE_HM_OBJECT();
+		} else if (aDPtype.equals(DataPoint.DP_Type.PURPOSE_HM_OBJECT)) {
+			this.initDataPoint_PURPOSE_HM_OBJECT();
 		} else if (aDPtype.equals(DataPoint.DP_Type.BUILDINGCATEGORY)) {
 			this.initDataPoint_BUILDINGCATEGORY();
 		} else if (aDPtype.equals(DataPoint.DP_Type.MEASUREDHEIGHT)) {
@@ -845,7 +900,9 @@ public class DataPoint {
 			this.initDataPoint_DESIGN_HAS_GARDEN();
 		} else if (aDPtype.equals(DataPoint.DP_Type.TOTAL_SURFACE_WATER_NON_PERMABLE)) {
 			this.initDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE();
-		} else
+		} else if (aDPtype.equals(DataPoint.DP_Type.PROFESSION_AT_HOME)) {
+			this.initDataPoint_PROFESSION_AT_HOME();
+		}
 			ServerGlobals.getInstance().log("ERROR: No init entry for " + aDPtype);
 
 	}
