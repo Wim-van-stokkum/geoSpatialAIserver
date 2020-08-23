@@ -8,7 +8,20 @@ import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class AnswersAdditionalQuestions {
    	int referenceID;
+	AssessRequestContext.tUsertype usertype=AssessRequestContext.tUsertype.AANVRAGER;
+	
    	List <DataPointValue> additionalDataPoints;
+   	
+	
+
+
+	public AssessRequestContext.tUsertype getUsertype() {
+		return this.usertype;
+	}
+
+	public void setUsertype(AssessRequestContext.tUsertype aUserType) {
+		this.usertype = aUserType;
+	}
    	
 	public int getReferenceID() {
 		return referenceID;

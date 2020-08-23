@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.beans.AssessRequest;
-import nl.geospatialAI.beans.AssessRequestDAO;
+import nl.geospatialAI.beans.AssessRequestContext;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -32,6 +32,7 @@ public class AssessRequestController {
 		AssessRequestReply theReply;
 		boolean BIMfile_statusknown;
 		
+		
         // get globals
 		theServerGlobals = ServerGlobals.getInstance();
 		thePolicyLibrary = theServerGlobals.getPolicyLibrary();
@@ -46,6 +47,13 @@ public class AssessRequestController {
 		
 		// Create a response for the request
 		theReply = new AssessRequestReply();
+		theReply.setUserType( AssessRequestContext.tUsertype.AANVRAGER);
+		if (aRequest.getTheContext().getUserType() != null) {
+			if (aRequest.getTheContext().getUserType().equals( AssessRequestContext.tUsertype.BEOORDELAAR)) {
+				theReply.setUserType( AssessRequestContext.tUsertype.BEOORDELAAR);
+	
+			}
+		}
 	
 
 
@@ -59,17 +67,17 @@ public class AssessRequestController {
 
 		// First Assessment of case, but first check BIM file availability
 		BIMfile_statusknown = newCase.HandleBIMFile(theServerGlobals, newCase, theReply);
+		newCase.determinePolicyForContext(thePolicyLibrary,  theReply);
+		newCase.addRisksToReply(theServerGlobals, theReply);
 		if (BIMfile_statusknown) {
-			newCase.determinePolicyForContext(thePolicyLibrary,  theReply);
-			newCase.addRisksToReply(theServerGlobals, theReply);
 			newCase.startAssessment(theServerGlobals, theReply);
-			
+			newCase.evaluateAssessmentCriteria(theServerGlobals, theReply);
 		}
-		newCase.evaluateAssessmentCriteria(theServerGlobals, theReply);
+	
 
 
-		// stdregreply.CreateStubWithQuestions();
-
+		// prepare for user
+		  newCase.setForUser(theReply);
          // sent reply
 		theReply.setReferenceID(newCase.getCaseNo());
 		theReply.EvalStatus();

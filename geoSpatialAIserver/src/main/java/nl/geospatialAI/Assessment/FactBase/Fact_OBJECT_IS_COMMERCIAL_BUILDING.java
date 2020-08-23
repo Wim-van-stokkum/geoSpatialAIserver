@@ -13,38 +13,34 @@ public class Fact_OBJECT_IS_COMMERCIAL_BUILDING extends Fact {
 		theServerGlobals.log("Evaluatie van feit :" + this.getDisplayName());
 
 		this.resetUsedDataPoints();
-         	this.evaluateValue(theServerGlobals, theCase, theReply, level, exhaustive);
-        
+		this.clearExplanation();
+		this.evaluateValue(theServerGlobals, theCase, theReply, level, exhaustive);
+
 	}
-	
-	
+
 	private void evaluateValue(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level,
 			boolean exhaustive) {
 		DataPoint dp_Purpose_BuildingCategorie;
-		
 
 		String purposeValue;
-        boolean isCommercial;
-        boolean valueKnown;
-        
-        //init
-        isCommercial = false; 
-        valueKnown = false;
-        purposeValue = "";
+		boolean isCommercial;
+		boolean valueKnown;
 
-        dp_Purpose_BuildingCategorie = theCase.getCaseDataPointByType(theServerGlobals, theReply,
+		// init
+		isCommercial = false;
+		valueKnown = false;
+		purposeValue = "";
+
+		dp_Purpose_BuildingCategorie = theCase.getCaseDataPointByType(theServerGlobals, theReply,
 				DataPoint.DP_Type.BUILDINGCATEGORY);
 
 		if (dp_Purpose_BuildingCategorie.hasValue()) {
 			this.recordUsedDataPoint(dp_Purpose_BuildingCategorie);
 			purposeValue = dp_Purpose_BuildingCategorie.getConvertedValueString();
-		
-			if ( (purposeValue.equals("BEDRIJFSGEBOUW")) || 
-					(purposeValue.equals("HANDELSGEBOUW") )|| 
-					(purposeValue.equals("KANTOORACTIVITEITEN") )|| 
-					(purposeValue.equals("HORECAGEBOUW") )|| 
-					(purposeValue.equals("KANTOORGEBOUW") )|| 
-					(purposeValue.equals("KANTOORACTIVITEITEN") )){
+
+			if ((purposeValue.equals("BEDRIJFSGEBOUW")) || (purposeValue.equals("HANDELSGEBOUW"))
+					|| (purposeValue.equals("KANTOORACTIVITEITEN")) || (purposeValue.equals("HORECAGEBOUW"))
+					|| (purposeValue.equals("KANTOORGEBOUW")) || (purposeValue.equals("KANTOORACTIVITEITEN"))) {
 				isCommercial = true;
 				valueKnown = true;
 				this.addToExplanation("Object is expliciet gebouwd voor commerciele doeleinden.");
@@ -52,27 +48,21 @@ public class Fact_OBJECT_IS_COMMERCIAL_BUILDING extends Fact {
 				isCommercial = false;
 				valueKnown = true;
 				this.addToExplanation("Gebouw is niet expliciet bestemd voor commerciele doeleinden");
-			} 
-				
-		}
-		
-		
-	
+			}
 
-		
+		}
+
 		if (valueKnown) {
 			if (isCommercial == true) {
-				 this.setFactResult(Fact.tFactClassificationType.TRUE);
+				this.setFactResult(Fact.tFactClassificationType.TRUE);
+			} else if (isCommercial == false) {
+				this.setFactResult(Fact.tFactClassificationType.FALSE);
 			}
-			else
-			if (isCommercial == false) {
-				 this.setFactResult(Fact.tFactClassificationType.FALSE);
-			}
-			
+
+		}	else {
+			this.needInput = true;
 		}
-	
-		
+
 	}
 
 }
-

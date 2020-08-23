@@ -3,6 +3,8 @@ package nl.geospatialAI.Case;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -11,16 +13,23 @@ import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Assessment.Risk;
 import nl.geospatialAI.BIM.BIMfile;
 import nl.geospatialAI.DataPoints.DataPoint;
+import nl.geospatialAI.KVK.KVKdetails;
 import nl.geospatialAI.assessObjects.DestinationPane;
 import nl.geospatialAI.assessObjects.HumanMadeObject;
 import nl.geospatialAI.beans.AssessRequest;
 import nl.geospatialAI.beans.AssessRequestContext;
 import nl.geospatialAI.beans.AssessRequestReply;
+import nl.geospatialAI.beans.DerivedDataPointsReply;
 import nl.geospatialAI.caseContext.Location;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class Case {
 	static int c_CaseNo = 10000;
+	static int assessCrit_refID = 499;
+	private int refID_crit_PURPOSE;
+	private int refID_crit_LIVING_ENVIRONMENT;
+	private int refID_crit_WATER;
+
 	private int caseNo;
 	private String caseID = "anomynous";
 	private Location contextLocation;
@@ -30,14 +39,13 @@ public class Case {
 	private HashMap<Integer, DataPoint> allDataPointsByID;
 	private HashMap<DataPoint.DP_Type, DataPoint> allDataPointsByType;
 	public BIMfile theBIMfile;
+	private KVKdetails theKVKdetails;
+	public boolean formalCase;
 
 	public enum tCaseType {
 		OBJECTPLANNING_SCENARIO, OBJECTMUTATION_SCENARIO, OBJECTPLANNING_REQUEST, OBJECTMUTATION_REQUEST
 	}
 
-	private boolean formalCase = false;
-
-	private List<DataPoint> requestedDataPoints;
 	private List<Risk> myRisks;
 
 	public Case() {
@@ -46,19 +54,29 @@ public class Case {
 		this.caseID = "Case: " + c_CaseNo;
 		this.caseNo = c_CaseNo;
 
+		assessCrit_refID = assessCrit_refID + 1;
+		refID_crit_PURPOSE = assessCrit_refID;
+
+		assessCrit_refID = assessCrit_refID + 1;
+		refID_crit_LIVING_ENVIRONMENT = assessCrit_refID;
+
+		assessCrit_refID = assessCrit_refID + 1;
+		refID_crit_WATER = assessCrit_refID;
+
 		// index to datapoints
 		allDataPointsByType = new HashMap<DataPoint.DP_Type, DataPoint>();
 		allDataPointsByID = new HashMap<Integer, DataPoint>();
-		requestedDataPoints = new ArrayList<DataPoint>();
+
+		theKVKdetails = new KVKdetails();
 
 		// initialize risks
 		myRisks = new ArrayList<Risk>();
 		this.theBIMfile = new BIMfile();
+		this.formalCase = false;
 
 	}
 
 	public void initCaseByRequest(AssessRequest aRequest, ServerGlobals theServerGlobals) {
-		AssessRequestContext theContext;
 
 		// copy the request body objects
 		this.setContextLocation(aRequest.getContextLocation());
@@ -147,14 +165,38 @@ public class Case {
 	public void determinePolicyForContext(PolicyLibrary thePolicyLibrary, AssessRequestReply theReply) {
 		Risk riskWater;
 		Risk horizonPolution;
+
 		Risk commercialUse;
 
-		riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
-		this.myRisks.add(riskWater);
-		horizonPolution = thePolicyLibrary.createRisk_HORIZON_POLUTION();
-		this.myRisks.add(horizonPolution);
-		commercialUse = thePolicyLibrary.createRisk_COMMERCIAL_USE();
-		this.myRisks.add(commercialUse);
+		if (ServerGlobals.getInstance().scenario.equals("ALL")) {
+			riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
+			this.myRisks.add(riskWater);
+			horizonPolution = thePolicyLibrary.createRisk_HORIZON_POLUTION();
+			this.myRisks.add(horizonPolution);
+			commercialUse = thePolicyLibrary.createRisk_COMMERCIAL_USE();
+			this.myRisks.add(commercialUse);
+		} else if (ServerGlobals.getInstance().scenario.equals("WATER")) {
+			riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
+			this.myRisks.add(riskWater);
+
+		} else
+
+		if (ServerGlobals.getInstance().scenario.equals("HORIZON_POLUTION")) {
+			horizonPolution = thePolicyLibrary.createRisk_HORIZON_POLUTION();
+			this.myRisks.add(horizonPolution);
+
+		} else if (ServerGlobals.getInstance().scenario.equals("COMMERCIAL_USE")) {
+			commercialUse = thePolicyLibrary.createRisk_COMMERCIAL_USE();
+			this.myRisks.add(commercialUse);
+
+		} else {
+			riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
+			this.myRisks.add(riskWater);
+			horizonPolution = thePolicyLibrary.createRisk_HORIZON_POLUTION();
+			this.myRisks.add(horizonPolution);
+			commercialUse = thePolicyLibrary.createRisk_COMMERCIAL_USE();
+			this.myRisks.add(commercialUse);
+		}
 	}
 
 	public void addRisksToReply(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
@@ -217,14 +259,13 @@ public class Case {
 		if (theType.equals(DataPoint.DP_Type.SURFACE_CALCULATED_DESTINATIONPANE)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_SURFACE_CALCULATED_DESTINATIONPANE(this,
 					theServiceGlobals, theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		} else
 
 		if (theType.equals(DataPoint.DP_Type.SURFACE_CALCULATED_GARDEN)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_SURFACE_CALCULATED_GARDEN(this,
 					theServiceGlobals, theReply);
 
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
 		}
 
 		else
@@ -232,7 +273,7 @@ public class Case {
 		if (theType.equals(DataPoint.DP_Type.SURFACE_TILES_GARDEN)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_SURFACE_TILES_GARDEN(this, theServiceGlobals,
 					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		}
 
 		else
@@ -240,8 +281,7 @@ public class Case {
 		if (theType.equals(DataPoint.DP_Type.SURFACE_CALCULATED_OBJECT)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_SURFACE_CALCULATED_OBJECT(this,
 					theServiceGlobals, theReply);
-			this.getTheHumanMadeObject().addRequestedDataPoint(newDP);
-			this.index_a_Datapoint(newDP); // CHECK
+
 		}
 
 		else
@@ -254,28 +294,28 @@ public class Case {
 		if (theType.equals(DataPoint.DP_Type.TOTAL_SURFACE_WATER_NON_PERMABLE)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE(this,
 					theServiceGlobals, theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		} else
 
 		if (theType.equals(DataPoint.DP_Type.BIMFILEURL)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_BIMFILEURL(this, theServiceGlobals, theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		} else
 
 		if (theType.equals(DataPoint.DP_Type.DESIGN_HAS_GARDEN)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_DESIGN_HAS_GARDEN(this, theServiceGlobals,
 					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		} else if (theType.equals(DataPoint.DP_Type.PURPOSE_HM_OBJECT)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_PURPOSE_HM_OBJECT(this, theServiceGlobals,
 					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		} else
 
 		if (theType.equals(DataPoint.DP_Type.MEASUREDHEIGHT)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_MEASUREDHEIGHT(this, theServiceGlobals,
 					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		}
 
 		else
@@ -283,16 +323,35 @@ public class Case {
 		if (theType.equals(DataPoint.DP_Type.PROFESSION_AT_HOME)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_PROFESSION_AT_HOME(this, theServiceGlobals,
 					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
 		}
-		
 
 		else
 
-		if (theType.equals(DataPoint.DP_Type.BUILDINGCATEGORY)) {
+		if (theType.equals(DataPoint.DP_Type.SBI_ORGANISATION)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_SBI_ORGANISATION(this, theServiceGlobals,
+					theReply);
+
+		}
+
+		else if (theType.equals(DataPoint.DP_Type.BUILDINGCATEGORY)) {
 			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_BUILDINGCATEGORY(this, theServiceGlobals,
 					theReply);
-			this.getTheDestinationPane().addRequestedDataPoint(newDP);
+
+		} else
+
+		if (theType.equals(DataPoint.DP_Type.REGISTEREDDUTCHKVK)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_REGISTEREDDUTCHKVK(this, theServiceGlobals,
+					theReply);
+
+		}
+
+		else
+
+		if (theType.equals(DataPoint.DP_Type.CHAMBREOFCOMMERCEDOSSIERNUMBER)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_CHAMBREOFCOMMERCEDOSSIERNUMBER(this,
+					theServiceGlobals, theReply);
+
 		}
 
 		else
@@ -320,45 +379,51 @@ public class Case {
 	@JsonIgnore
 	public boolean HandleBIMFile(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply) {
 
-		DataPoint dp_BIM_Available;
 		DataPoint dp_BIM_filename;
 
-		boolean chk_BIM_available;
+		boolean BIMfile_statusknown;
 
 		String BIM_fileName;
 
-		chk_BIM_available = false;
+		BIMfile_statusknown = false;
 		if (this.theBIMfile.getActive() == false) {
+			theServerGlobals.log("DEBUG:BIM NIET actief");
 			// Check filename
 			dp_BIM_filename = this.CheckExistsDataPointByType(theServerGlobals, theReply, DataPoint.DP_Type.BIMFILEURL);
 			if (dp_BIM_filename != null) {
+				theServerGlobals.log("DEBUG:dp_BIM_filename not null");
 
-				this.theBIMfile.setActive(true);
-				chk_BIM_available = true;
 				if (dp_BIM_filename.hasValue()) {
 
-					BIM_fileName = dp_BIM_filename.getConvertedValueString();
-					theServerGlobals.log("FILENAME: " + BIM_fileName);
+					this.theBIMfile.setActive(true);
+					theServerGlobals.log("DEBUG:dp_BIM_filename HAS VALUE");
+					BIM_fileName = dp_BIM_filename.getValue();
+					// theServerGlobals.log("FILENAME: " + BIM_fileName);
+
+					BIMfile_statusknown = true;
 					this.theBIMfile.setFileName(BIM_fileName);
 					this.theBIMfile.processBIMfile(theServerGlobals, theCase);
-				} else {
-					dp_BIM_filename.changeValue("WONING.BIM", theServerGlobals);
-					this.theBIMfile.setFileName("WONING.BIM");
-					dp_BIM_filename.setDatapointSource(DataPoint.DP_source.USER);
-					this.theBIMfile.processBIMfile(theServerGlobals, theCase);
+
 				}
+
 			} else {
 				// request
-				chk_BIM_available = false;
-				dp_BIM_filename = this.getCaseDataPointByType(theServerGlobals, theReply, DataPoint.DP_Type.BIMFILEURL);
+				if (this.theBIMfile.getFileName().equals("NO_BIM") == false) {
+
+					BIMfile_statusknown = false;
+					dp_BIM_filename = this.getCaseDataPointByType(theServerGlobals, theReply,
+							DataPoint.DP_Type.BIMFILEURL);
+				}
 			}
 
 		} else {
 			// is al active
-			chk_BIM_available = true;
+			theServerGlobals.log("DEBUG:BIM actief");
+			BIMfile_statusknown = true;
 			this.theBIMfile.processBIMfile(theServerGlobals, theCase);
 		}
-		return chk_BIM_available;
+		theServerGlobals.log("Sending: " + BIMfile_statusknown);
+		return BIMfile_statusknown;
 	}
 
 	public boolean hasBIM() {
@@ -391,6 +456,7 @@ public class Case {
 		ok = true; // tot tegendeel
 		aantalRisk = 0;
 		waterCriterium = new AssessmentCriterium();
+		waterCriterium.setRefID(this.refID_crit_WATER);
 		waterCriterium.setDisplayName("Beoordeling op water aspecten");
 		waterCriterium.setExemptionRequestAllowed(false);
 		waterCriterium.setCriteriumCategory(AssessmentCriterium.tAssessmentCriteriumCategoryType.WATER);
@@ -419,10 +485,9 @@ public class Case {
 		theReply.addAssessmentCriterium(waterCriterium);
 	}
 
-	
 	private void evaluateAssessmentPurpose(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
 		// AssessmentCriteria Water
-		AssessmentCriterium livingEnvironmentCriterium;
+		AssessmentCriterium purposeCriterium;
 		Risk aRisk;
 		int i;
 		boolean ok;
@@ -430,17 +495,16 @@ public class Case {
 
 		ok = true; // tot tegendeel
 		aantalRisk = 0;
-		livingEnvironmentCriterium = new AssessmentCriterium();
-		livingEnvironmentCriterium.setDisplayName("Beoordeling op bestemming");
-		livingEnvironmentCriterium.setExemptionRequestAllowed(false);
-		livingEnvironmentCriterium
-				.setCriteriumCategory(AssessmentCriterium.tAssessmentCriteriumCategoryType.PURPOSE);
+		purposeCriterium = new AssessmentCriterium();
+		purposeCriterium.setRefID(this.refID_crit_PURPOSE);
+		purposeCriterium.setDisplayName("Beoordeling op bestemming");
+		purposeCriterium.setExemptionRequestAllowed(false);
+		purposeCriterium.setCriteriumCategory(AssessmentCriterium.tAssessmentCriteriumCategoryType.PURPOSE);
 
 		for (i = 0; i < this.myRisks.size(); i++) {
 			aRisk = this.myRisks.get(i);
-			if (aRisk.getMyAssessmentCriterium().equals(livingEnvironmentCriterium.getCriteriumCategory())) {
+			if (aRisk.getMyAssessmentCriterium().equals(purposeCriterium.getCriteriumCategory())) {
 				if (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false) {
-					aantalRisk = aantalRisk + 1;
 				}
 				if ((aRisk.getRiskValue().equals(Risk.tRiskClassificationType.NEUTRAL) == false)
 						&& (aRisk.getRiskValue().equals(Risk.tRiskClassificationType.UNDETERMINED) == false)) {
@@ -451,18 +515,15 @@ public class Case {
 		}
 
 		if (ok && (aantalRisk > 0)) {
-			livingEnvironmentCriterium
-					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.APPROVED);
+			purposeCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.APPROVED);
 		} else if (ok && (aantalRisk == 0)) {
-			livingEnvironmentCriterium
-					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNKNOWN);
+			purposeCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNKNOWN);
 		} else if (ok == false) {
-			livingEnvironmentCriterium
-					.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
+			purposeCriterium.setAssessmentResult(AssessmentCriterium.tAssessmentCriteriumClassificationType.UNAPPROVED);
 		}
-		theReply.addAssessmentCriterium(livingEnvironmentCriterium);
+		theReply.addAssessmentCriterium(purposeCriterium);
 	}
-	
+
 	private void evaluateAssessmentLivingEnvironment(ServerGlobals theServerGlobals, AssessRequestReply theReply) {
 		// AssessmentCriteria Water
 		AssessmentCriterium livingEnvironmentCriterium;
@@ -474,6 +535,7 @@ public class Case {
 		ok = true; // tot tegendeel
 		aantalRisk = 0;
 		livingEnvironmentCriterium = new AssessmentCriterium();
+		livingEnvironmentCriterium.setRefID(this.refID_crit_LIVING_ENVIRONMENT);
 		livingEnvironmentCriterium.setDisplayName("Beoordeling op leef omgeving aspecten");
 		livingEnvironmentCriterium.setExemptionRequestAllowed(false);
 		livingEnvironmentCriterium
@@ -520,6 +582,69 @@ public class Case {
 		}
 
 		return theRisk;
+	}
+
+	public void checkKVKRegister(String aKVKnummer) {
+		if (this.theKVKdetails != null) {
+			this.theKVKdetails.readKVK(aKVKnummer);
+
+		} else
+			ServerGlobals.getInstance().log("ERROR: KVK DETAILS NOT FOUND");
+
+	}
+
+	public KVKdetails getKVKdetails() {
+		KVKdetails theDetails;
+
+		theDetails = null;
+		if (this.theKVKdetails != null) {
+			theDetails = this.theKVKdetails;
+		}
+
+		return theDetails;
+	}
+
+	public void gatherDerivedDataPoints(DerivedDataPointsReply derivedDataPointsReply) {
+
+		DataPoint aDP;
+		boolean isDerived;
+
+		for (Entry<Integer, DataPoint> anEntry : allDataPointsByID.entrySet()) {
+			aDP = anEntry.getValue();
+			isDerived = false;
+
+			if (       (aDP.getDatapointSource().equals(DataPoint.DP_source.RULE_ENGINE))
+					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.DESIGN_FILE))
+					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.ADMINISTRATION))
+					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.EXTERNAL_FORMAL))
+					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.EXTERNAL_INFORMAL)
+					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.FORMAL_REGISTRY))
+					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.OTHER)))) {
+				isDerived = true;
+		
+			}
+
+			if (isDerived) {
+				derivedDataPointsReply.addDerivedPataPoint(aDP);
+			}
+
+			System.out.println("refID = " + anEntry.getKey() + ", DataPoint = " + anEntry.getValue().getQuestionText()
+					+ ", Source :   " + anEntry.getValue().getDatapointSource() + ", Derived :   " + isDerived);
+		}
+	}
+
+	public void setForUser(AssessRequestReply theReply) {
+		DataPoint aDP;
+		AssessRequestContext.tUsertype theUserType;
+		
+		theUserType = theReply.getUserType();
+	
+		for (Entry<Integer, DataPoint> anEntry : allDataPointsByID.entrySet()) {
+			aDP = anEntry.getValue();
+			theUserType= theReply.getUserType();
+			aDP.setForUser(theUserType);
+		}
+		
 	}
 
 }

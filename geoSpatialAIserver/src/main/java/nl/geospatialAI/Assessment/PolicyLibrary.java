@@ -10,6 +10,7 @@ import nl.geospatialAI.Assessment.FactBase.Fact_PROFESSION_CATEGORY_B;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.DataPoints.derivedDataPoints.DataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE;
+import nl.geospatialAI.KVK.KVKdetails;
 import nl.geospatialAI.assessObjects.HumanMadeObject;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
@@ -53,7 +54,7 @@ public class PolicyLibrary {
 
 	public Risk createRisk_HORIZON_POLUTION() {
 		Risk newRisk;
-		Proof myProof;
+
 		Proof subProof;
 
 		newRisk = new Risk();
@@ -80,7 +81,7 @@ public class PolicyLibrary {
 
 	public Risk createRisk_COMMERCIAL_USE() {
 		Risk newRisk;
-		Proof myProof;
+
 		Proof subProof;
 
 		newRisk = new Risk();
@@ -128,6 +129,9 @@ public class PolicyLibrary {
 
 		newFact = createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
+		
+
+		
 		newFact = createFact_PROFESSION_CATEGORY_B(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
 		return newProof;
@@ -387,6 +391,18 @@ public class PolicyLibrary {
 
 	}
 
+	public DataPoint createDataPoint_REGISTEREDDUTCHKVK(Case theCase, ServerGlobals theServiceGlobals,
+			AssessRequestReply theReply) {
+
+		DataPoint newDP;
+
+		newDP = new DataPoint(DataPoint.DP_Type.REGISTEREDDUTCHKVK);
+
+		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
+		return newDP;
+
+	}
+	
 	public DataPoint createDataPoint_PURPOSE_HM_OBJECT(Case theCase, ServerGlobals theServiceGlobals,
 			AssessRequestReply theReply) {
 
@@ -407,6 +423,31 @@ public class PolicyLibrary {
 		return newDP;
 
 	}
+	
+	
+	public DataPoint createDataPoint_SBI_ORGANISATION(Case theCase, ServerGlobals theServiceGlobals,
+			AssessRequestReply theReply) {
+
+		DataPoint newDP;
+		KVKdetails theKVK;
+
+		newDP = new DataPoint(DataPoint.DP_Type.SBI_ORGANISATION);
+
+		// KVK
+		theKVK = theCase.getKVKdetails();
+		if (theKVK.isReadKVK()) {
+
+			newDP.setValue(String.valueOf(theKVK.getCodeSBI()));
+			newDP.setDatapointSource(DataPoint.DP_source.FORMAL_REGISTRY);
+			newDP.setAskable(false);
+
+		}
+
+		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
+		return newDP;
+
+	}
+	
 
 	public DataPoint createDataPoint_BUILDINGCATEGORY(Case theCase, ServerGlobals theServiceGlobals,
 			AssessRequestReply theReply) {

@@ -104,6 +104,8 @@ public class BIMfile {
 	}
 
 	public boolean isActive() {
+	
+		
 		return active;
 	}
 
@@ -134,7 +136,7 @@ public class BIMfile {
 			this.setObjectLength(42.5);
 			this.setFootPrintGarden(115);
 
-		}
+		} 
 		else {
 			this.setActive(false);
 		

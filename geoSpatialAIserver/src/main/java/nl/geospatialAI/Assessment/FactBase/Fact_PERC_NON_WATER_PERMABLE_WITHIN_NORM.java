@@ -14,7 +14,7 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 		theServerGlobals.log("Evaluatie van feit :" + this.getDisplayName());
 
 		this.resetUsedDataPoints();
-
+		this.clearExplanation();
 		this.evaluate(theServerGlobals, theCase, theReply, level, exhaustive);
 
 	}
@@ -60,6 +60,12 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 				}
 
 			}
+			else {
+				this.needInput = true;
+			}
+		}
+		else {
+			this.needInput = true;
 		}
 
 	}

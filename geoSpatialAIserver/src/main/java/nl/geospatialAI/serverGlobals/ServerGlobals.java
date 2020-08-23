@@ -15,6 +15,7 @@ public class ServerGlobals {
 	private PolicyLibrary thePolicyLibrary;
 	private CasesDAO caseRegistration;
 	private t_LogLevel logLevel;
+	public String scenario ;
 
 	public static ServerGlobals getInstance() {
 
@@ -23,6 +24,7 @@ public class ServerGlobals {
 			stdServ = new ServerGlobals();
 			stdServ.caseRegistration = CasesDAO.getInstance();
 			stdServ.setLogLevel(ServerGlobals.t_LogLevel.HIGH_DETAIL);
+			stdServ.scenario = "ALL";
 			return stdServ;
 
 		}
@@ -77,6 +79,11 @@ public class ServerGlobals {
 		if (this.getLogLevel() == ServerGlobals.t_LogLevel.HIGH_DETAIL) {
 			System.out.println(theMessage);
 		}
+	}
+
+	public void setScenario(String scenario2) {
+		// TODO Auto-generated method stub
+		this.scenario = scenario2;
 	}
 
 }

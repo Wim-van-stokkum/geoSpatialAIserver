@@ -114,6 +114,7 @@ public class DestinationPane {
 					theServerGlobals
 							.log("DataPoint: " + aDP.getDP_refId() + " was not answered but is askable, so will request again");
 					theSubmitReply.RequestDataPoint(aDP);
+				
 				}
 			}
 		}

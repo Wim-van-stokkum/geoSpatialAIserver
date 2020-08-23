@@ -1,6 +1,7 @@
 package nl.geospatialAI.DataPoints;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.Justification.JustificationDatapoint;
 import nl.geospatialAI.Justification.JustificationFact;
+import nl.geospatialAI.beans.AssessRequestContext;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -17,11 +19,11 @@ public class DataPoint {
 
 		MEASUREDHEIGHT, MEASUREDDISTANCE,
 
-		CHAMBREOFCOMMERCEDOSSIERNUMBER, COMMERCIALUSE, BUSINESSACTIVITIES,
+		CHAMBREOFCOMMERCEDOSSIERNUMBER, REGISTEREDDUTCHKVK, COMMERCIALUSE, BUSINESSACTIVITIES,
 
 		BIMFILEURL,
 
-		PURPOSE_HM_OBJECT, BUILDINGCATEGORY, DESIGN_HAS_GARDEN,
+		PURPOSE_HM_OBJECT, BUILDINGCATEGORY, DESIGN_HAS_GARDEN, SBI_ORGANISATION,
 
 		MAX_LENGTH_DESTINATIONPANE, MAX_WIDTH_DESTINATIONPANE, SURFACE_CALCULATED_DESTINATIONPANE,
 
@@ -29,8 +31,7 @@ public class DataPoint {
 
 		MAX_WIDTH_GARDEN, MAX_LENGTH_GARDEN, SURFACE_CALCULATED_GARDEN,
 
-		SURFACE_TILES_GARDEN, PERC_WATER_PERM_GARDEN, TOTAL_SURFACE_WATER_NON_PERMABLE,
-		PROFESSION_AT_HOME
+		SURFACE_TILES_GARDEN, PERC_WATER_PERM_GARDEN, TOTAL_SURFACE_WATER_NON_PERMABLE, PROFESSION_AT_HOME
 
 		// to de defined or extented in pilot
 
@@ -93,6 +94,9 @@ public class DataPoint {
 	// @JsonIgnore
 	boolean isAskable = true;
 
+	protected HashMap<String, String> questionTextPerRole;
+	protected HashMap<String, String> explainTextPerRole ;
+
 	boolean multiValued = false;
 	boolean required = false;
 	int DP_refId;
@@ -115,6 +119,8 @@ public class DataPoint {
 		System.out.println("CREATING DATAPOINT: " + this.getDP_refId());
 		isAskable = true;
 		usedDataPoints = new ArrayList<DataPoint>();
+		questionTextPerRole = new HashMap<String, String>();
+		explainTextPerRole = new HashMap<String, String>();
 	}
 
 	public void resetUsedDataPoints() {
@@ -131,6 +137,8 @@ public class DataPoint {
 		System.out.println("CREATING DATAPOINT: " + this.getDP_refId());
 		isAskable = true;
 		usedDataPoints = new ArrayList<DataPoint>();
+		questionTextPerRole = new HashMap<String, String>();
+		explainTextPerRole = new HashMap<String, String>();
 		this.initDataPoint(aSpecificType);
 
 	}
@@ -416,19 +424,17 @@ public class DataPoint {
 		String val;
 
 		val = "UNKNOWN";
-		ServerGlobals.getInstance().log(this.dataPointType.toString());
-		ServerGlobals.getInstance().log(this.dataType.toString());
+
 		if (this.getDataType().equals(DataPoint.DP_dataType.TEXT)
 				|| this.getDataType().equals(DataPoint.DP_dataType.FILE_URL)
-				||  this.getDataType().equals(DataPoint.DP_dataType.VALUESELECTION)) {
-	
+				|| this.getDataType().equals(DataPoint.DP_dataType.VALUESELECTION)) {
 
 			if (this.hasValue()) {
 				val = this.getValue();
 			} else if (this.hasDefaultValue()) {
 				val = this.getDefaultValue();
-			}
-			ServerGlobals.getInstance().log("ERROR: Missing value while expecting it: " + this.getQuestionText());
+			} else
+				ServerGlobals.getInstance().log("ERROR: Missing value while expecting it: " + this.getQuestionText());
 
 		} else
 			ServerGlobals.getInstance()
@@ -465,12 +471,20 @@ public class DataPoint {
 	// ====================================================================================
 
 	private void initDataPoint_BIMFILEURL() {
-		System.out.println("INIT BIMFILEURL");
 
 		DataPoint newDP;
 		AllowedValue newValue;
 
 		newDP = this;
+		
+		questionTextPerRole.put("AANVRAGER", "Hoe heet uw bestand met het ontwerp?");
+		questionTextPerRole.put("BEOORDELAAR", "Hoe heet de BIM file?");
+
+		explainTextPerRole.put("AANVRAGER",
+				"Als u geen ontwerp bestand heeft, kies dan voor GEEN.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Raadpleeg de repository met ingediende ontwerp bestanden.");
+		
 		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
 		newDP.setDataType(DataPoint.DP_dataType.FILE_URL);
 		newDP.setDataPointType(DataPoint.DP_Type.BIMFILEURL);
@@ -489,8 +503,18 @@ public class DataPoint {
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
+		newValue.setCode("WONING_TUIN.BIM");
+		newValue.setDisplayText("WONING MET TUIN.BIM");
+		newDP.addAllowedValue(newValue);
+
+		newValue = new AllowedValue();
 		newValue.setCode("KANTOOR.BIM");
 		newValue.setDisplayText("WONING.BIM");
+		newDP.addAllowedValue(newValue);
+
+		newValue = new AllowedValue();
+		newValue.setCode("SCHOOL.BIM");
+		newValue.setDisplayText("SCHOOL.BIM");
 		newDP.addAllowedValue(newValue);
 	}
 
@@ -512,13 +536,13 @@ public class DataPoint {
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
-		newValue.setCode("BRANDSTOF");
-		newValue.setDisplayText("Gebruikt voor opslag of verkoop brandstoffen");
+		newValue.setCode("EDUCATIE");
+		newValue.setDisplayText("Educatie/scholing");
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
-		newValue.setCode("DRIJVEN");
-		newValue.setDisplayText("Gebruikt voor drijven op water");
+		newValue.setCode("PRODUCTIE");
+		newValue.setDisplayText("Productie van goederen");
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
@@ -527,17 +551,43 @@ public class DataPoint {
 		newDP.addAllowedValue(newValue);
 	}
 
+	public void setForUser(AssessRequestContext.tUsertype usertype) {
+		if (usertype.equals(AssessRequestContext.tUsertype.BEOORDELAAR)) {
+
+			this.setDefaultValue(this.questionTextPerRole.get("BEOORDELAAR"));
+			this.setExplanationText(this.explainTextPerRole.get("BEOORDELAAR"));
+
+		} else {
+			if ((this.questionTextPerRole.get("AANVRAGER") != null)) {
+				this.setExplanationText(this.explainTextPerRole.get("AANVRAGER"));
+				this.setQuestionText(this.questionTextPerRole.get("AANVRAGER"));
+			}
+			else {
+				//doe ff niets
+			}
+		}
+
+	}
+
 	private void initDataPoint_BUILDINGCATEGORY() {
 		DataPoint newDP;
 		AllowedValue newValue;
 
 		newDP = this;
+		questionTextPerRole.put("AANVRAGER", "Wat is het voor soort gebouw dat u wil plaatsen?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat voor type object is het hoofdgebouw?");
+
+		explainTextPerRole.put("AANVRAGER",
+				"Wij vragen dit om te bepalen aan welke normen het gebouw en de bestemming dient te voldoen.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Gebruik de classificatie zoals beschreven in definities beleidsdocument.");
+
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataPointType(DataPoint.DP_Type.BUILDINGCATEGORY);
 		newDP.setDataType(DataPoint.DP_dataType.VALUESELECTION);
 		newDP.setDefaultValue("WOONGEBOUW");
-		newDP.setExplanationText("Object bestemd te dienen als hoofdverblijf voor wonen");
-		newDP.setQuestionText("Welk type heeft het the plaatsen hoofdgebouw?");
+		newDP.setExplanationText(this.explainTextPerRole.get("AANVRAGER"));
+		newDP.setQuestionText(this.questionTextPerRole.get("AANVRAGER"));
 
 		newValue = new AllowedValue();
 		newValue.setCode("BEDRIJFSGEBOUW");
@@ -603,6 +653,18 @@ public class DataPoint {
 
 	}
 
+	private void initDataPoint_SBI_ORGANISATION() {
+		DataPoint newDP;
+
+		newDP = this;
+		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
+		newDP.setDataType(DataPoint.DP_dataType.INTEGERVALUE);
+		newDP.setDataPointType(DataPoint.DP_Type.SBI_ORGANISATION);
+
+		newDP.setQuestionText("Onder welke SBI code staat uw organisatie geregistreerd?");
+		newDP.setExplanationText("Wij vragen dit om de type activiteiten in het object af te leiden");
+	}
+
 	private void initDataPoint_SURFACE_CALCULATED_OBJECT() {
 		DataPoint newDP;
 
@@ -663,6 +725,20 @@ public class DataPoint {
 
 		newDP.setQuestionText("Gaat u werkzaamheden aan huis verrichten?");
 		newDP.setExplanationText("Wij vragen dit om risico's m.b.t bestemming vast te kunnen stellen");
+
+	}
+
+	private void initDataPoint_REGISTEREDDUTCHKVK() {
+		DataPoint newDP;
+
+		newDP = this;
+		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
+		newDP.setDataType(DataPoint.DP_dataType.TRUTHVALUE);
+		newDP.setDataPointType(DataPoint.DP_Type.REGISTEREDDUTCHKVK);
+
+		newDP.setQuestionText("Heeft u een inschrijving in de Kamer van Koophandel?");
+		newDP.setExplanationText(
+				"Hiermee kunnen we uw openbare gegevens opvragen en zonder extra vragen gegevens verzamelen over uw commerciele activiteiten");
 
 	}
 
@@ -750,8 +826,8 @@ public class DataPoint {
 		newDP.setDataType(DataPoint.DP_dataType.TEXT);
 		newDP.setDataPointType(DataPoint.DP_Type.CHAMBREOFCOMMERCEDOSSIERNUMBER);
 
-		newDP.setQuestionText("Wat is de oppervlakte van de tuin?");
-		newDP.setExplanationText("Wij vragen dit de watertoelatendheid vast te stellen");
+		newDP.setQuestionText("Onder welke KVK nummer staat u ingeschreven?");
+		newDP.setExplanationText("Hiermee kunnen we gegevens uit de basisadministratie benaderen");
 	}
 
 	private void initDataPoint_PERC_WATER_PERM_GARDEN() {
@@ -805,12 +881,11 @@ public class DataPoint {
 		newDP.setExplanationText("Nodig om te beoordelen of deze binnen normen valt");
 
 	}
-	
 
 	private void initDataPoint_PROFESSION_AT_HOME() {
 		DataPoint newDP;
 		AllowedValue newValue;
-		
+
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
 		newDP.setDataType(DataPoint.DP_dataType.VALUESELECTION);
@@ -821,7 +896,6 @@ public class DataPoint {
 		newDP.setQuestionText("Beroep uitgeoefend aan huis");
 		newDP.setExplanationText("Nodig om te beoordelen of dit beroep risico's met zich mee brengt voor de omgeving");
 
-		
 		newValue = new AllowedValue();
 		newValue.setCode("CONSULTANCY");
 		newValue.setDisplayText("Consultancy");
@@ -846,18 +920,17 @@ public class DataPoint {
 		newValue.setCode("DENTIST");
 		newValue.setDisplayText("Tandarts");
 		newDP.addAllowedValue(newValue);
-		
+
 		newValue = new AllowedValue();
 		newValue.setCode("BARBER");
 		newValue.setDisplayText("Kapper");
 		newDP.addAllowedValue(newValue);
-		
+
 		newValue = new AllowedValue();
 		newValue.setCode("OTHER");
 		newValue.setDisplayText("Ander beroep");
 		newDP.addAllowedValue(newValue);
 	}
-
 
 	public void initDataPoint(DataPoint.DP_Type aDPtype) {
 		if (aDPtype.equals(DataPoint.DP_Type.BIMFILEURL)) {
@@ -902,7 +975,11 @@ public class DataPoint {
 			this.initDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE();
 		} else if (aDPtype.equals(DataPoint.DP_Type.PROFESSION_AT_HOME)) {
 			this.initDataPoint_PROFESSION_AT_HOME();
-		}
+		} else if (aDPtype.equals(DataPoint.DP_Type.REGISTEREDDUTCHKVK)) {
+			this.initDataPoint_REGISTEREDDUTCHKVK();
+		} else if (aDPtype.equals(DataPoint.DP_Type.SBI_ORGANISATION)) {
+			this.initDataPoint_SBI_ORGANISATION();
+		} else
 			ServerGlobals.getInstance().log("ERROR: No init entry for " + aDPtype);
 
 	}
@@ -912,7 +989,7 @@ public class DataPoint {
 
 		int i;
 		DataPoint aUsedDataPoint;
-		
+
 		JustificationDatapoint myDataPointJustification;
 
 		myDataPointJustification = new JustificationDatapoint(this);
@@ -921,7 +998,7 @@ public class DataPoint {
 		// To do Sub DataPoints
 		for (i = 0; i < this.usedDataPoints.size(); i++) {
 			aUsedDataPoint = this.usedDataPoints.get(i);
-			aUsedDataPoint.justifyChildDataPoint(theServerGlobals,correspondingCase, myDataPointJustification); 
+			aUsedDataPoint.justifyChildDataPoint(theServerGlobals, correspondingCase, myDataPointJustification);
 		}
 	}
 
@@ -929,17 +1006,29 @@ public class DataPoint {
 			JustificationDatapoint myDataPointJustification) {
 		JustificationDatapoint ChildDataPointJustification;
 		DataPoint aUsedDataPoint;
-        int i;
-        
-        
+		int i;
+
 		ChildDataPointJustification = new JustificationDatapoint(this);
 		myDataPointJustification.addChildDataPointJustification(ChildDataPointJustification);
 		// To do Sub DataPoints
-				for (i = 0; i < this.usedDataPoints.size(); i++) {
-					aUsedDataPoint = this.usedDataPoints.get(i);
-					aUsedDataPoint.justifyChildDataPoint(theServerGlobals,correspondingCase, myDataPointJustification); 
-				}
-		
+		for (i = 0; i < this.usedDataPoints.size(); i++) {
+			aUsedDataPoint = this.usedDataPoints.get(i);
+			aUsedDataPoint.justifyChildDataPoint(theServerGlobals, correspondingCase, myDataPointJustification);
+		}
+
+	}
+
+	public String getDisplayValueFor(String professionInfo) {
+		int i;
+		String display;
+		display = "";
+		for (i = 0; i < this.allowedValueList.size(); i++) {
+			if (this.allowedValueList.get(i).getCode().equals(professionInfo)) {
+				display = this.allowedValueList.get(i).getDisplayText();
+			}
+		}
+
+		return display;
 	}
 
 }

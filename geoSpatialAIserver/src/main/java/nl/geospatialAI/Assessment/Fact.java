@@ -50,6 +50,13 @@ public class Fact {
 	protected tOperandType myOperand = Fact.tOperandType.AND;
 	protected List<DataPoint> usedDataPoints;
 	protected String explanation;
+	protected boolean needInput;
+
+	
+
+	public boolean getNeedInput() {
+		return this.needInput;
+	}
 	
 	public Fact() {
 
@@ -60,10 +67,6 @@ public class Fact {
 
 		this.usedDataPoints = new ArrayList<DataPoint>();
 		explanation = "";
-
-		System.out.println("CREATING FACT [" + this.getRefID() + "]");
-		System.out.println("----------------------------------------");
-		System.out.println();
 
 	}
 
@@ -140,32 +143,40 @@ public class Fact {
 		return myOperand;
 	}
 
+
 	// ASSESS
 
 	public tFactClassificationType assessFact(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
 
+
 		theServerGlobals.log("BEOORDEEL FEIT  [level: " + level + "]");
 		theServerGlobals.log("===================================");
-		theServerGlobals.log("Feit: " + this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log(this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("");
 
+		
 	
-
+		// Proof all underlying facts
+	
+	
+	
+        this.needInput = false ;   // tot tegendeel bewezen
 	    
 		if (this.mySubFacts.size() > 0) {
+
 			// there are sub facts
 
 			theServerGlobals.log("BEOORDEEL ONDERLIGGENDE FEITEN  [level: " + level + "]");
 			theServerGlobals.log("============================================================");
-			theServerGlobals.log("Feit: " + this.getDisplayName() + " [id: " + this.refID + "]");
+			theServerGlobals.log( this.getDisplayName() + " [id: " + this.refID + "]");
 			theServerGlobals.log("Justification: " + this.getPolicyReference());
 			theServerGlobals.log("Operand: " + this.getOperand());
 			theServerGlobals.log("");
 
-			if (this.getOperand().equals(Proof.tOperandType.AND)) {
+			if (this.getOperand().equals(Fact.tOperandType.AND)) {
 				this.evalFactasAND(theServerGlobals, theCase, theReply, exhaustive, level + 1);
-			} else if (this.getOperand().equals(Proof.tOperandType.OR)) {
+			} else if (this.getOperand().equals(Fact.tOperandType.OR)) {
 				this.evalFactasOR(theServerGlobals, theCase, theReply, exhaustive, level + 1);
 			}
 			this.setFactResult(this.subFactsOverallResult);
@@ -173,10 +184,11 @@ public class Fact {
 		else {
 			// No sub facts
 			this.evaluateFactResult(theServerGlobals, theCase, theReply,  level + 1, exhaustive);
-			
+		
 		}
 
 
+	
 
 		// if applicable set default value
 
@@ -194,7 +206,7 @@ public class Fact {
 		theServerGlobals.log("=================");
 		theServerGlobals.log("BEOORDEELD FEIT");
 		theServerGlobals.log("=================");
-		theServerGlobals.log("Feit: " + this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log(this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Bron: " + this.getPolicyReference());
 		if (this.mySubFacts.size() > 1) {
 			theServerGlobals.log("Onderliggende feiten: " + this.subFactsOverallResult);
@@ -216,17 +228,24 @@ public class Fact {
 	protected void evalFactasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
-
+		boolean breakBecauseNeedInput;
+		
 		// Review all underlying facts
-		for (i = 0; i < this.mySubFacts.size(); i++) {
+		breakBecauseNeedInput = false;
+		
+		for  (i = 0; ((i < this.mySubFacts.size()) && (breakBecauseNeedInput == false)); i++) {
 			aFactResult = mySubFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
-
+			breakBecauseNeedInput = mySubFacts.get(i).getNeedInput();
+			if (breakBecauseNeedInput) {
+				this.needInput = true;
+			}
+			
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				this.subFactsOverallResult = Fact.tFactClassificationType.FALSE;
 				aValueSet = true;
 
-				theServerGlobals.log("Overall impact fact: evaluatie naar FALSE vanwege AND");
-				theServerGlobals.log("");
+			//	theServerGlobals.log("Overall impact fact: evaluatie naar FALSE vanwege AND");
+				//theServerGlobals.log("");
 
 			} else if (aFactResult.equals(Fact.tFactClassificationType.TRUE)) {
 				// Negative remain Negative : no action
@@ -237,8 +256,8 @@ public class Fact {
 					if (this.aValueSet == false) {
 						// flip undetermined first time to positive
 
-						theServerGlobals.log("Overall impact feit: evaluatie van onbekend naar true");
-						theServerGlobals.log("");
+				//		theServerGlobals.log("Overall impact feit: evaluatie van onbekend naar true");
+				//		theServerGlobals.log("");
 
 						this.subFactsOverallResult = Fact.tFactClassificationType.TRUE;
 						this.aValueSet = true;
@@ -252,15 +271,15 @@ public class Fact {
 					this.subFactsOverallResult = Fact.tFactClassificationType.UNKNOWN;
 					this.aValueSet = true;
 
-					theServerGlobals.log("Overall impact feit : TRUE wordt onbekend");
-					theServerGlobals.log("");
+			//		theServerGlobals.log("Overall impact feit : TRUE wordt onbekend");
+				//	theServerGlobals.log("");
 
 				}
 				if (this.subFactsOverallResult.equals( Fact.tFactClassificationType.UNKNOWN)) {
 					if (aValueSet == false) {
 
-						theServerGlobals.log("Overall impact: fixeer onbekend");
-						theServerGlobals.log("");
+				//		theServerGlobals.log("Overall impact: fixeer onbekend");
+					//	theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -272,8 +291,8 @@ public class Fact {
 			if ((exhaustive == false) && (subFactsOverallResult.equals(Fact.tFactClassificationType.FALSE))
 					&& (i < (this.mySubFacts.size() - 1))) {
 
-				theServerGlobals.log("Stop voortijdig beoordeling van gecombineerd feit " + this.refID
-						+ ". Een van onderliggende feiten zijn FALSE en operand is AND");
+	//			theServerGlobals.log("Stop voortijdig beoordeling van gecombineerd feit " + this.refID
+			//			+ ". Een van onderliggende feiten zijn FALSE en operand is AND");
 				this.clearExplanation();
 				break;
 			}
@@ -284,11 +303,17 @@ public class Fact {
 	protected void evalFactasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, boolean exhaustive, int level) {
 		int i;
 		Fact.tFactClassificationType aFactResult;
-
+		boolean breakBecauseNeedInput;
+		
 		// Review all underlying facts
-		for (i = 0; i < this.mySubFacts.size(); i++) {
+		breakBecauseNeedInput = false;
+		
+		for  (i = 0; ((i < this.mySubFacts.size()) && (breakBecauseNeedInput == false)); i++) {
 			aFactResult = mySubFacts.get(i).assessFact(theServerGlobals, theCase, theReply, level, exhaustive);
-
+			breakBecauseNeedInput = mySubFacts.get(i).getNeedInput();
+			if (breakBecauseNeedInput) {
+				this.needInput = true;
+			}
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				// Positive stay positive
 				// Negative stays negative
@@ -299,14 +324,14 @@ public class Fact {
 					aValueSet = true;
 				}
 
-				theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
-				theServerGlobals.log("");
+	//			theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
+	//			theServerGlobals.log("");
 
 			} else if (aFactResult.equals(Fact.tFactClassificationType.TRUE)) {
 				// Bij OR wordt resultaat POSITIEF: no matter waht the other will be
 
-				theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
-				theServerGlobals.log("");
+	//			theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
+	//			theServerGlobals.log("");
 
 				this.subFactsOverallResult = Fact.tFactClassificationType.TRUE;
 				this.aValueSet = true;
@@ -318,8 +343,8 @@ public class Fact {
 					this.subFactsOverallResult = Fact.tFactClassificationType.UNKNOWN;
 					this.aValueSet = true;
 
-					theServerGlobals.log("Overall impact : negatief wordt onbekend");
-					theServerGlobals.log("");
+	//				theServerGlobals.log("Overall impact : negatief wordt onbekend");
+		//			theServerGlobals.log("");
 
 				}
 				if (this.subFactsOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)) {
@@ -338,8 +363,8 @@ public class Fact {
 			if ((exhaustive == false) && (subFactsOverallResult.equals(Fact.tFactClassificationType.TRUE))
 					&& (i < (this.mySubFacts.size() - 1))) {
 
-				theServerGlobals.log("Stop voortijdig beoordeling van combinatie feit " + this.refID
-						+ ". Een van onderliggende subbewijzen is TRUE en operand is OR");
+	//			theServerGlobals.log("Stop voortijdig beoordeling van combinatie feit " + this.refID
+	//					+ ". Een van onderliggende subbewijzen is TRUE en operand is OR");
 				this.clearExplanation();
 
 				break;
@@ -348,13 +373,17 @@ public class Fact {
 		}
 	}
 	
-	private void clearExplanation() {
+	protected void clearExplanation() {
 		this.explanation = "";
 		
 	}
 
 	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level, boolean exhaustive) {
 		// General implementation used to be overriden
+		
+
+			this.needInput = true;
+
 	     	
 	}
 

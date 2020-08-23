@@ -18,6 +18,7 @@ public class JustificationProof {
 	public tProofClassificationType proofResult;
 	public String explanation;
 	public tOperandType operandApplied;
+	public boolean needAdditionalInputForNonManualAssessment;
 	public List<JustificationFact> underlyingFacts;
 	
 	
@@ -29,6 +30,7 @@ public class JustificationProof {
 		this.proofResult = aProof.getProofResult();
 		this.explanation = aProof.explainYourSelf();
 		this.operandApplied = aProof.getOperand();
+		this.needAdditionalInputForNonManualAssessment = aProof.getNeedInput();  //TO DO REMOVE?
 		
 
 		underlyingFacts = new ArrayList<JustificationFact>();

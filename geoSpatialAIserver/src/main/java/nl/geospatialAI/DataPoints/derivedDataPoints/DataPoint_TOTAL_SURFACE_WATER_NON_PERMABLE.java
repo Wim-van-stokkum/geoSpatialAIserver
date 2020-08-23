@@ -25,7 +25,7 @@ public class DataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE extends DataPoint {
 		DataPoint DP_hasGarden;
 		
 		double surfObject;
-		double surfGarden;
+	
 		double surfTiled;
 		double total;
 		boolean succesA, succesB;

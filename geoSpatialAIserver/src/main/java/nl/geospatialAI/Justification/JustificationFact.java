@@ -18,6 +18,8 @@ public class JustificationFact {
 	
 	public String explanation;
 	public List<JustificationDatapoint>  underlyingDataPoints;
+	
+	public boolean needAdditionalInputForNonManualAssessment;
 
 	public JustificationFact(Fact aFact) {
 		this.refID = aFact.getRefID();
@@ -25,6 +27,7 @@ public class JustificationFact {
 		this.displayName = aFact.getDisplayName();
 		this.explanation = aFact.explainYourSelf();
 		this.factResult = aFact.getFactResult();
+		this.needAdditionalInputForNonManualAssessment = aFact.getNeedInput();  //TO DO REMOVE?
 		underlyingDataPoints = new ArrayList<JustificationDatapoint>();
 	
 	}

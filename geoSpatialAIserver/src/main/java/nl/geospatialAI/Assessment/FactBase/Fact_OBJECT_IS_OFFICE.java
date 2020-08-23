@@ -13,6 +13,7 @@ public class Fact_OBJECT_IS_OFFICE extends Fact {
 		theServerGlobals.log("Evaluatie van feit :" + this.getDisplayName());
 
 		this.resetUsedDataPoints();
+		this.clearExplanation();
 		this.evaluateValue(theServerGlobals, theCase, theReply, level, exhaustive);
 
 	}
@@ -56,6 +57,8 @@ public class Fact_OBJECT_IS_OFFICE extends Fact {
 				this.setFactResult(Fact.tFactClassificationType.FALSE);
 			}
 
+		} 	else {
+			this.needInput = true;
 		}
 
 	}

@@ -25,7 +25,7 @@ public enum tAssessmentCriteriumClassificationType {
 
 
 
-static int assessCrit_refID = 499;
+
 	
 	   private String displayName;
 	   private int refID;
@@ -36,8 +36,7 @@ static int assessCrit_refID = 499;
 	   
 	  public  AssessmentCriterium() {
 		  // CREATING ASSESSMENTCRITIUM
-		  assessCrit_refID = assessCrit_refID + 1;
-		  this.setRefID(assessCrit_refID);
+
 	  }
 	   
 	  

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.Errorhandling.ErrorReason;
 import nl.geospatialAI.beans.AnswersAdditionalQuestions;
+import nl.geospatialAI.beans.AssessRequestContext;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
@@ -28,13 +29,17 @@ public class SubmitQuestionsAnswersController {
 		Case correspondingCase;
 		ErrorReason anError;
 		AssessRequestReply theSubmitReply;
+		boolean BIMfile_statusknown;
 
+	
 		// get globals
+		
 		theServerGlobals = ServerGlobals.getInstance();
 		theServerGlobals.log("receiving answers for: " + aRequest.getReferenceID());
 
 		// create the reply
 		theSubmitReply = new AssessRequestReply();
+		BIMfile_statusknown = false;
 
 		// process the request
 		// - Get The corresponding (anomynous) case
@@ -56,8 +61,15 @@ public class SubmitQuestionsAnswersController {
 			correspondingCase.addRisksToReply(theServerGlobals, theSubmitReply);
 			// Reassess and
 
-			correspondingCase.startAssessment(theServerGlobals, theSubmitReply);
-			correspondingCase.evaluateAssessmentCriteria(theServerGlobals, theSubmitReply);
+			
+			BIMfile_statusknown = correspondingCase.HandleBIMFile(theServerGlobals, correspondingCase, theSubmitReply);
+			if (BIMfile_statusknown) {
+
+				correspondingCase.startAssessment(theServerGlobals, theSubmitReply);
+				correspondingCase.evaluateAssessmentCriteria(theServerGlobals, theSubmitReply);
+			
+			}
+			
 
 		}
 
