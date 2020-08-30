@@ -33,7 +33,11 @@ public class JustificationRisk {
 		this.policyReference = aRisk.getPolicyReference();
 		this.displayName = aRisk.getDisplayName();
 		this.riskValue = aRisk.getRiskValue();
+		if (aRisk.isEvaluated()) { 
 		this.explanation = aRisk.explainYourSelf();
+		} else {
+			this.explanation = "Dit risico is niet betrokken in de beoordeling.";
+		}
 		this.underlyingProofResults = new ArrayList<JustificationProof>();
 		
 		aRisk.justifyTheProofs(theServerGlobals,correspondingCase,aRisk , this );

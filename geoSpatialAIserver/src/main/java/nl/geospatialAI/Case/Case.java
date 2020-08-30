@@ -3,11 +3,11 @@ package nl.geospatialAI.Case;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import nl.geospatialAI.Assessment.ApplicablePolicy;
 import nl.geospatialAI.Assessment.AssessmentCriterium;
 import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Assessment.Risk;
@@ -40,6 +40,7 @@ public class Case {
 	private HashMap<DataPoint.DP_Type, DataPoint> allDataPointsByType;
 	public BIMfile theBIMfile;
 	private KVKdetails theKVKdetails;
+	public ApplicablePolicy thePolicy;
 	public boolean formalCase;
 
 	public enum tCaseType {
@@ -73,7 +74,32 @@ public class Case {
 		myRisks = new ArrayList<Risk>();
 		this.theBIMfile = new BIMfile();
 		this.formalCase = false;
+		this.thePolicy = new ApplicablePolicy();
 
+	}
+	
+	public double GetNormMaxHouse() {
+		return this.thePolicy.getNorm_max_height_house();
+	}
+	
+	public double GetNormMaxOffice() {
+		return this.thePolicy.getNorm_max_height_office();
+	}
+	
+	public double GetNormPercWaterPermable() {
+		return this.thePolicy.getPerc_water_permable();
+	}
+	
+	
+	public boolean GetNormWorkHomeAllowed() {
+		return this.thePolicy.isWork_home_allowed();
+	}
+	
+
+	
+	public void setPolicyForZipcode(String aZipCode) {
+		this.thePolicy.setPolicyCentrum();
+		
 	}
 
 	public void initCaseByRequest(AssessRequest aRequest, ServerGlobals theServerGlobals) {
@@ -168,6 +194,7 @@ public class Case {
 
 		Risk commercialUse;
 
+		this.setPolicyForZipcode("todo");
 		if (ServerGlobals.getInstance().scenario.equals("ALL")) {
 			riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
 			this.myRisks.add(riskWater);
@@ -353,6 +380,13 @@ public class Case {
 					theServiceGlobals, theReply);
 
 		}
+
+		else
+
+			if (theType.equals(DataPoint.DP_Type.WORK_FROM_HOME)) {
+				newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_WORK_AT_HOME(this, theServiceGlobals, theReply);
+
+			}
 
 		else
 			theServiceGlobals.log("ERROR CREATING NEW DP: no creation point for type: " + theType);

@@ -43,11 +43,11 @@ public class Fact_OBJECT_IS_COMMERCIAL_BUILDING extends Fact {
 					|| (purposeValue.equals("KANTOORGEBOUW")) || (purposeValue.equals("KANTOORACTIVITEITEN"))) {
 				isCommercial = true;
 				valueKnown = true;
-				this.addToExplanation("Object is expliciet gebouwd voor commerciele doeleinden.");
+				this.addToExplanation("Gebouw is ontworpen voor commerciele doeleinden.");
 			} else {
 				isCommercial = false;
 				valueKnown = true;
-				this.addToExplanation("Gebouw is niet expliciet bestemd voor commerciele doeleinden");
+				this.addToExplanation("Gebouw is niet expliciet ontworpen voor commerciele doeleinden");
 			}
 
 		}

@@ -15,7 +15,8 @@ public class Proof {
 
 	public enum tProofCategoryType {
 		UNDER_MAX_HEIGHT, ALLOWED_PROFFESION_AT_HOUSE, WITHIN_BOUNDARY_BUILD_SURFACE, SURFACE_FOUNDATION,
-		SURFACE_ADDITIONAL_BUILDINGS, SURFACE_WATER_NON_PERM_ACCEPTABLE, OBJECT_MEANT_FOR_COMMERCIAL_USE
+		SURFACE_ADDITIONAL_BUILDINGS, SURFACE_WATER_NON_PERM_ACCEPTABLE, NO_WORK_FROM_HOME,
+		OBJECT_MEANT_FOR_COMMERCIAL_USE
 
 		// to be defined in use case
 	}
@@ -39,6 +40,7 @@ public class Proof {
 	private String policyReference;
 
 	private String displayName;
+	private boolean evaluated;
 
 	private List<Proof> mySubProofs;
 	private List<Fact> myFacts;
@@ -61,11 +63,16 @@ public class Proof {
 	}
 
 	protected void addToExplanation(String aText) {
-	
-		if (this.explanation.length() == 0) {
-			this.explanation = aText;
-		} else {
-			this.explanation = this.explanation + " " + aText;
+
+		if (aText != null) {
+			if (aText.length() > 0) {
+
+				if (this.explanation.length() == 0) {
+					this.explanation = aText;
+				} else {
+					this.explanation = this.explanation + " " + aText;
+				}
+			}
 		}
 
 	}
@@ -110,8 +117,8 @@ public class Proof {
 
 		this.mySubProofs = new ArrayList<Proof>();
 		this.myFacts = new ArrayList<Fact>();
+		this.evaluated = false;
 
-	
 	}
 
 	public String getDisplayName() {
@@ -154,6 +161,8 @@ public class Proof {
 		theServerGlobals.log("Proof: " + this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("");
+
+		this.evaluated = true;
 
 		this.needInput = false; // until proofed otherWise
 		this.clearMyExplanation();
@@ -214,12 +223,12 @@ public class Proof {
 
 		if ((this.myFacts.size() > 0) && (this.mySubProofs.size() == 0)) {
 			this.setProofResult(resultFacts);
-		//	theServerGlobals.log("SET RESULT FOR FACTS: " + resultFacts);
+			// theServerGlobals.log("SET RESULT FOR FACTS: " + resultFacts);
 		}
 
 		if ((this.myFacts.size() == 0) && (this.mySubProofs.size() > 0)) {
 			this.setProofResult(resultAssessmentSubProof);
-		//	theServerGlobals.log("SET RESULT FOR PROOFS: " + resultAssessmentSubProof);
+			// theServerGlobals.log("SET RESULT FOR PROOFS: " + resultAssessmentSubProof);
 		}
 
 		// if applicable set default value
@@ -269,7 +278,7 @@ public class Proof {
 
 		theServerGlobals.log("BEOORDEEL ONDERLIGGENDE BEWIJZEN  [level: " + level + "]");
 		theServerGlobals.log("============================================================");
-		theServerGlobals.log( this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log(this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("Operand: " + this.getOperand());
 		theServerGlobals.log("");
@@ -338,8 +347,8 @@ public class Proof {
 				this.subProofOverallResult = Proof.tProofClassificationType.NEGATIVE;
 				aValueSet = true;
 
-		//		theServerGlobals.log("Overall impact: evaluatie naar negatief vanwege AND");
-		//		theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact: evaluatie naar negatief vanwege AND");
+				// theServerGlobals.log("");
 
 			} else if (aProofResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 				// Negative remain Negative : no action
@@ -350,8 +359,8 @@ public class Proof {
 					if (this.aValueSet == false) {
 						// flip undetermined first time to positive
 
-			//			theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
-			//			theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
+						// theServerGlobals.log("");
 
 						this.subProofOverallResult = Proof.tProofClassificationType.POSITIVE;
 						this.aValueSet = true;
@@ -365,15 +374,15 @@ public class Proof {
 					this.subProofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
 					this.aValueSet = true;
 
-			//		theServerGlobals.log("Overall impact : positief wordt onbekend");
-				//	theServerGlobals.log("");
+					// theServerGlobals.log("Overall impact : positief wordt onbekend");
+					// theServerGlobals.log("");
 
 				}
 				if (this.subProofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (aValueSet == false) {
 
-			//			theServerGlobals.log("Overall impact: fixeer onbekend");
-			//			theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: fixeer onbekend");
+						// theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -385,8 +394,9 @@ public class Proof {
 			if ((exhaustive == false) && (subProofOverallResult.equals(Proof.tProofClassificationType.NEGATIVE))
 					&& (i < (this.mySubProofs.size() - 1))) {
 
-			//	theServerGlobals.log("Stop voortijdig beoordeling van gecombineerd bewijs " + this.refID
-			//			+ ". Een van onderliggende bewijzen zijn negatief en operand is AND");
+				// theServerGlobals.log("Stop voortijdig beoordeling van gecombineerd bewijs " +
+				// this.refID
+				// + ". Een van onderliggende bewijzen zijn negatief en operand is AND");
 				this.clearExplanation();
 				break;
 			}
@@ -398,8 +408,8 @@ public class Proof {
 			boolean exhaustive, int level) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
-        boolean breakBecauseNeedInput;
-        
+		boolean breakBecauseNeedInput;
+
 		// Proof all underlying proofs
 		breakBecauseNeedInput = false;
 		for (i = 0; ((i < this.mySubProofs.size()) && (breakBecauseNeedInput == false)); i++) {
@@ -420,14 +430,14 @@ public class Proof {
 					aValueSet = true;
 				}
 
-		//		theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
+				// theServerGlobals.log("");
 
 			} else if (aProofResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 				// Bij OR wordt resultaat POSITIEF: no matter waht the other will be
 
-		//		theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
-		//		theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
+				// theServerGlobals.log("");
 
 				this.subProofOverallResult = Proof.tProofClassificationType.POSITIVE;
 				this.aValueSet = true;
@@ -439,15 +449,15 @@ public class Proof {
 					this.subProofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
 					this.aValueSet = true;
 
-		//			theServerGlobals.log("Overall impact : negatief wordt onbekend");
-		//			theServerGlobals.log("");
+					// theServerGlobals.log("Overall impact : negatief wordt onbekend");
+					// theServerGlobals.log("");
 
 				}
 				if (this.subProofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (aValueSet == false) {
 
-			//			theServerGlobals.log("Overall impact: fixeer onbekend");
-			//			theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: fixeer onbekend");
+						// theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -459,9 +469,10 @@ public class Proof {
 			if ((exhaustive == false) && (subProofOverallResult.equals(Proof.tProofClassificationType.POSITIVE))
 					&& (i < (this.mySubProofs.size() - 1))) {
 
-	//			theServerGlobals.log("Stop voortijdig beoordeling van combinatie bewijs " + this.refID
-		//				+ ". Een van onderliggende subbewijzen is POSITIEF en operand is OR");
-				this.clearExplanation();
+				// theServerGlobals.log("Stop voortijdig beoordeling van combinatie bewijs " +
+				// this.refID
+				// + ". Een van onderliggende subbewijzen is POSITIEF en operand is OR");
+
 				break;
 			}
 
@@ -492,8 +503,9 @@ public class Proof {
 				this.subFactOverallResult = Fact.tFactClassificationType.FALSE;
 				aValueSet = true;
 
-	//			theServerGlobals.log("Overall impact feit: evaluatie naar FALSE vanwege AND");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact feit: evaluatie naar FALSE vanwege
+				// AND");
+				// theServerGlobals.log("");
 
 			} else if (aFactResult.equals(Fact.tFactClassificationType.TRUE)) {
 				// Negative remain Negative : no action
@@ -504,8 +516,8 @@ public class Proof {
 					if (this.aValueSet == false) {
 						// flip undetermined first time to positive
 
-		//				theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
-	//					theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
+						// theServerGlobals.log("");
 
 						this.subFactOverallResult = Fact.tFactClassificationType.TRUE;
 						this.aValueSet = true;
@@ -519,15 +531,15 @@ public class Proof {
 					this.subFactOverallResult = Fact.tFactClassificationType.UNKNOWN;
 					this.aValueSet = true;
 
-		//			theServerGlobals.log("Overall impact feit : true wordt onbekend");
-		//			theServerGlobals.log("");
+					// theServerGlobals.log("Overall impact feit : true wordt onbekend");
+					// theServerGlobals.log("");
 
 				}
 				if (this.subFactOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)) {
 					if (aValueSet == false) {
 
-		//				theServerGlobals.log("Overall impact feit: fixeer onbekend");
-			//			theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact feit: fixeer onbekend");
+						// theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -539,13 +551,17 @@ public class Proof {
 			if ((exhaustive == false) && (subFactOverallResult.equals(Fact.tFactClassificationType.FALSE))
 					&& (i < (this.myFacts.size() - 1))) {
 
-	//			theServerGlobals.log("Stop voortijdig beoordeling van feiten " + this.refID
-	//					+ ". Een van onderliggende feiten zijn negatief en operand is AND");
+				// theServerGlobals.log("Stop voortijdig beoordeling van feiten " + this.refID
+				// + ". Een van onderliggende feiten zijn negatief en operand is AND");
 				this.clearExplanation();
 				break;
 			}
 
 		}
+	}
+
+	public boolean isEvaluated() {
+		return this.evaluated;
 	}
 
 	private void evalFactsasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
@@ -565,6 +581,8 @@ public class Proof {
 				this.needInput = true;
 			}
 
+			this.addToExplanation(myFacts.get(i).explainYourSelf());
+
 			if (aFactResult.equals(Fact.tFactClassificationType.FALSE)) {
 				// Positive stay positive
 				// Negative stays negative
@@ -575,13 +593,14 @@ public class Proof {
 				}
 
 //				theServerGlobals.log("Overall impact: evaluatie van onbekend naar FALSE");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("");
 
 			} else if (aFactResult.equals(Fact.tFactClassificationType.TRUE)) {
 				// Bij OR wordt resultaat POSITIEF: no matter waht the other will be
 
-	//			theServerGlobals.log("Overall impact feiten : evaluatie naar TRUE vanwege OR");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact feiten : evaluatie naar TRUE vanwege
+				// OR");
+				// theServerGlobals.log("");
 
 				this.subFactOverallResult = Fact.tFactClassificationType.TRUE;
 				this.aValueSet = true;
@@ -593,15 +612,15 @@ public class Proof {
 					this.subFactOverallResult = Fact.tFactClassificationType.UNKNOWN;
 					this.aValueSet = true;
 
-	//				theServerGlobals.log("Overall impact feiten : FALSE wordt onbekend");
-	//				theServerGlobals.log("");
+					// theServerGlobals.log("Overall impact feiten : FALSE wordt onbekend");
+					// theServerGlobals.log("");
 
 				}
 				if (this.subFactOverallResult.equals(Fact.tFactClassificationType.UNKNOWN)) {
 					if (aValueSet == false) {
 
-		//				theServerGlobals.log("Overall impact feiten: fixeer onbekend");
-			//			theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact feiten: fixeer onbekend");
+						// theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -613,9 +632,9 @@ public class Proof {
 			if ((exhaustive == false) && (subFactOverallResult.equals(Fact.tFactClassificationType.TRUE))
 					&& (i < (this.mySubProofs.size() - 1))) {
 
-	//			theServerGlobals.log("Stop voortijdig beoordeling van feiten " + this.refID
-		//				+ ". Een van onderliggende feiten is TRUE en operand is OR");
-				this.clearExplanation();
+				// theServerGlobals.log("Stop voortijdig beoordeling van feiten " + this.refID
+				// + ". Een van onderliggende feiten is TRUE en operand is OR");
+
 				break;
 			}
 
@@ -639,7 +658,9 @@ public class Proof {
 
 		for (i = 0; i < this.myFacts.size(); i++) {
 			aFact = this.myFacts.get(i);
-			aFact.justifyFact(theServerGlobals, correspondingCase, myProofJustification);
+			if (aFact.isEvaluated()) {
+				aFact.justifyFact(theServerGlobals, correspondingCase, myProofJustification);
+			}
 		}
 
 	}

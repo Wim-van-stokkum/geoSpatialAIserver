@@ -75,6 +75,7 @@ public class JustifyController {
 		
 		if (correspondingCase != null) {
 			if (theRisk != null) {
+
 				theJustifyReply.justifyTheRisk(theServerGlobals,correspondingCase,theRisk  );
 				
 			}

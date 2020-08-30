@@ -18,7 +18,7 @@ public class Fact {
 	public enum tFactType {
 		HEIGHT_ABOVE_GREENFIELD, HOUSE_HEIGHT_WITHIN_NORM, OFFICE_HEIGHT_WITHIN_NORM, 
 		PROFESSION_CATEGORY_B, OBJECT_TYPE_IS_OFFICE,  
-		OBJECT_TYPE_IS_HOUSE, 
+		OBJECT_TYPE_IS_HOUSE, WORK_FROM_HOME,NO_WORK_FROM_HOME, 
 		PERC_NON_WATER_PERMABLE_UNDER_NORM,
 		OBJECT_IS_COMMERCIAL_BUILDING
 		// to be defined in use case
@@ -41,6 +41,7 @@ public class Fact {
 	protected tFactClassificationType defaultFactResult = Fact.tFactClassificationType.UNKNOWN;
 
 	protected String policyReference;
+	protected boolean evaluated;
 
 	protected String displayName;
 
@@ -67,6 +68,7 @@ public class Fact {
 
 		this.usedDataPoints = new ArrayList<DataPoint>();
 		explanation = "";
+		evaluated = false;
 
 	}
 
@@ -112,13 +114,16 @@ public class Fact {
 	}
 	
 	protected void addToExplanation(String aText) {
-		if (this.explanation.length() == 0) {
-			this.explanation = aText;
+		if (aText != null) {
+			if (aText.length() > 0) {
+
+				if (this.explanation.length() == 0) {
+					this.explanation = aText;
+				} else {
+					this.explanation = this.explanation + " " + aText;
+				}
+			}
 		}
-		else {
-			this.explanation = this.explanation + " " +  aText;
-		}
-		
 	}
 
 
@@ -155,7 +160,7 @@ public class Fact {
 		theServerGlobals.log("Justification: " + this.getPolicyReference());
 		theServerGlobals.log("");
 
-		
+		this.evaluated = true;
 	
 		// Proof all underlying facts
 	
@@ -365,7 +370,7 @@ public class Fact {
 
 	//			theServerGlobals.log("Stop voortijdig beoordeling van combinatie feit " + this.refID
 	//					+ ". Een van onderliggende subbewijzen is TRUE en operand is OR");
-				this.clearExplanation();
+		
 
 				break;
 			}
@@ -394,6 +399,10 @@ public class Fact {
 	public void recordUsedDataPoint(DataPoint aUsedDP) {
 		this.usedDataPoints.add(aUsedDP);
 	}
+	
+	public boolean isEvaluated() {
+		return this.evaluated;
+	}
 
 	public void justifyFact(ServerGlobals theServerGlobals, Case correspondingCase,
 			JustificationProof myProofJustification) {
@@ -412,5 +421,7 @@ public class Fact {
 	     }
 		
 	}
+
+	
 	
 }

@@ -21,7 +21,7 @@ public class DataPoint {
 
 		CHAMBREOFCOMMERCEDOSSIERNUMBER, REGISTEREDDUTCHKVK, COMMERCIALUSE, BUSINESSACTIVITIES,
 
-		BIMFILEURL,
+		BIMFILEURL,WORK_FROM_HOME,
 
 		PURPOSE_HM_OBJECT, BUILDINGCATEGORY, DESIGN_HAS_GARDEN, SBI_ORGANISATION,
 
@@ -521,6 +521,15 @@ public class DataPoint {
 	private void initDataPoint_PURPOSE_HM_OBJECT() {
 		DataPoint newDP;
 		AllowedValue newValue;
+		
+		
+		questionTextPerRole.put("AANVRAGER", "Voor welk doel wilt u het object gebruiken?");
+		questionTextPerRole.put("BEOORDELAAR", "Welke type activiteit wordt gepland for dit object?");
+
+		explainTextPerRole.put("AANVRAGER",
+				"Dit gegeven hebben we nodig om te controleren of deze bestemming is toegestaan.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Dit gegeven is nodig om de bestemming te valideren tegen beleid bestemmingsplan.");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.PURPOSE);
@@ -537,7 +546,7 @@ public class DataPoint {
 
 		newValue = new AllowedValue();
 		newValue.setCode("EDUCATIE");
-		newValue.setDisplayText("Educatie/scholing");
+		newValue.setDisplayText("Educatie of scholing");
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
@@ -574,7 +583,7 @@ public class DataPoint {
 		AllowedValue newValue;
 
 		newDP = this;
-		questionTextPerRole.put("AANVRAGER", "Wat is het voor soort gebouw dat u wil plaatsen?");
+		questionTextPerRole.put("AANVRAGER", "Wat voor type gebouw wilt u plaatsen?");
 		questionTextPerRole.put("BEOORDELAAR", "Wat voor type object is het hoofdgebouw?");
 
 		explainTextPerRole.put("AANVRAGER",
@@ -617,6 +626,14 @@ public class DataPoint {
 
 	private void initDataPoint_MEASUREDHEIGHT() {
 		DataPoint newDP;
+		
+		
+		questionTextPerRole.put("AANVRAGER", "Hoe hoog wilt u het gebouw gaan bouwen?");
+		questionTextPerRole.put("BEOORDELAAR", "De hoogte van het object");
+		explainTextPerRole.put("AANVRAGER",
+				"Gaat om hoogte vanaf maaiveld tot aan hoogste punt in het ontwerp in meters");
+		explainTextPerRole.put("BEOORDELAAR",
+				"De hoogte zoals gedefinieerd in de definities van het beleid");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
@@ -630,6 +647,13 @@ public class DataPoint {
 	private void initDataPoint_MAX_WIDTH_OBJECT() {
 		DataPoint newDP;
 
+		questionTextPerRole.put("AANVRAGER", "Wat wordt de maximale breedte van het gebouw?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de maximale breedte van het object?");
+		explainTextPerRole.put("AANVRAGER",
+				"De breedte het gebouw in meters");
+		explainTextPerRole.put("BEOORDELAAR",
+				"De breedte zoals gedefinieerd in de definities van het beleid");
+		
 		newDP = this;
 
 		newDP.setDataPointCategory(DataPoint.DP_category.CONSTRUCTION);
@@ -643,6 +667,13 @@ public class DataPoint {
 	private void initDataPoint_MAX_LENGTH_OBJECT() {
 		DataPoint newDP;
 
+		questionTextPerRole.put("AANVRAGER", "Wat wordt de maximale lengte van het gebouw?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de maximale lengte van het object?");
+		explainTextPerRole.put("AANVRAGER",
+				"De lengte het gebouw in meters");
+		explainTextPerRole.put("BEOORDELAAR",
+				"De lengte zoals gedefinieerd in de definities van het beleid");
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.CONSTRUCTION);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -656,6 +687,14 @@ public class DataPoint {
 	private void initDataPoint_SBI_ORGANISATION() {
 		DataPoint newDP;
 
+		questionTextPerRole.put("AANVRAGER", "Wat is de primaire SBI die de KVK heeft geregistreerd?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de primaire SBI code?");
+		explainTextPerRole.put("AANVRAGER",
+				"De SBI code zoals geregistreerd in de Kamer van Koophandel");
+		explainTextPerRole.put("BEOORDELAAR",
+				"De SBI code geregistreerd in Kamer van Koophandel");
+		
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
 		newDP.setDataType(DataPoint.DP_dataType.INTEGERVALUE);
@@ -668,6 +707,13 @@ public class DataPoint {
 	private void initDataPoint_SURFACE_CALCULATED_OBJECT() {
 		DataPoint newDP;
 
+		questionTextPerRole.put("AANVRAGER", "Wat wordt de oppervlakte van de gebouw(en)?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de oppervlakte van hoofd- en bijgebouw?");
+		explainTextPerRole.put("AANVRAGER",
+				"Het gaat om oppervlakte fundering van hoofd- en bijgebouwen (schuren etc).");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Het gaat om oppervlakte fundering van hoofd- en bijgebouwen (schuren etc).");
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -679,31 +725,53 @@ public class DataPoint {
 
 	private void initDataPoint_MAX_WIDTH_DESTINATIONPANE() {
 		DataPoint newDP;
+		
+		questionTextPerRole.put("AANVRAGER", "Wat is de oppervlakte van het perceel waarop het gebouw wordt geplaatst.");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is oppervlakte van bouwperceel");
+		explainTextPerRole.put("AANVRAGER",
+				"Nodig om de verhouding vast te stellen tussen bebouwd en onbebouwd deel.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Nodig om de verhouding vast te stellen tussen bebouwd en onbebouwd deel. Raadpleeg kadaster");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.CONSTRUCTION);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
 		newDP.setDataPointType(DataPoint.DP_Type.MAX_WIDTH_DESTINATIONPANE);
 
-		newDP.setExplanationText("Gebruik centimers. Nodig voor berekenen standaard oppervlakte perceel");
-		newDP.setQuestionText("Maximale breedte bouwperceel");
+		newDP.setExplanationText("Gebruik meters. Nodig voor berekenen standaard oppervlakte perceel");
+		newDP.setQuestionText("Maximale breedte bouwperceel in meters.");
 
 	}
 
 	private void initDataPoint_MAX_LENGTH_DESTINATIONPANE() {
 		DataPoint newDP;
+		
+
+		questionTextPerRole.put("AANVRAGER", "Wat is de maximale lengte van het perceel waarop het gebouw wordt geplaatst.");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de maximale lengte van het bouwperceel");
+		explainTextPerRole.put("AANVRAGER",
+				"Nodig om de oppervlakte vast te stellen van het bouwperceel");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Nodig om de oppervlakte vast te stellen van het bouwperceel");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.CONSTRUCTION);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
 		newDP.setDataPointType(DataPoint.DP_Type.MAX_LENGTH_DESTINATIONPANE);
 
-		newDP.setExplanationText("Gebruik centimers. Nodig voor berekenen standaard oppervlakte perceel");
-		newDP.setQuestionText("Maximale lengte bouwperceel");
+		newDP.setExplanationText("Gebruik meters. Nodig voor berekenen standaard oppervlakte perceel");
+		newDP.setQuestionText("Maximale lengte bouwperceel in meters.");
 
 	}
 
 	private void initDataPoint_SURFACE_CALCULATED_DESTINATIONPANE() {
+		questionTextPerRole.put("AANVRAGER", "Wat is de oppervlakte van het bouwperceel?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de oppervlakte van het bouwperceel?");
+		explainTextPerRole.put("AANVRAGER",
+				"Nodig om de verhouding tussen object en bouwperceel vast te stellen");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Oppervlakte bouwperceel is nodig om verhouding bouwing/niet bebouwing vast te stellen");
+		
 		DataPoint newDP;
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
@@ -716,7 +784,15 @@ public class DataPoint {
 
 	private void initDataPoint_COMMERCIALUSE() {
 		DataPoint newDP;
-
+		
+		questionTextPerRole.put("AANVRAGER", "Gaat u werkzaamheden aan huis verrichten?");
+		questionTextPerRole.put("BEOORDELAAR", "Voor welk doel wordt het gebouw gebruikt?");
+		explainTextPerRole.put("AANVRAGER",
+				"Nodig om te beoordelen of deze werkzaamheden passen bij gebouw en omgeving");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Nodig om risico bestemming vast te stellen");
+		
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
 		newDP.setDataType(DataPoint.DP_dataType.TRUTHVALUE);
@@ -728,8 +804,38 @@ public class DataPoint {
 
 	}
 
+	
+	
+
+	private void initDataPoint_WORK_FROM_HOME() {
+		DataPoint newDP;
+		
+		questionTextPerRole.put("AANVRAGER", "Gaat u vanuit huis werken?");
+		questionTextPerRole.put("BEOORDELAAR", "Gaat de aanvrager vanuit huis werken?");
+		explainTextPerRole.put("AANVRAGER",
+				"Er worden eisen gesteld aan het soort beroepen die vanuit huis mogen worden uitgeoefend");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Indien ja, dan wordt getoetst of beroep in categorie B van beroepen valt.");
+
+		newDP = this;
+		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
+		newDP.setDataType(DataPoint.DP_dataType.TRUTHVALUE);
+		newDP.setDataPointType(DataPoint.DP_Type.WORK_FROM_HOME);
+
+		newDP.setQuestionText("Gaat u vanuit huis werken?");
+		newDP.setExplanationText(
+				"Er worden eisen gesteld aan het soort beroepen die vanuit huis mogen worden uitgeoefend");
+	}
+	
 	private void initDataPoint_REGISTEREDDUTCHKVK() {
 		DataPoint newDP;
+		
+		questionTextPerRole.put("AANVRAGER", "Heeft u een inschrijving in de Kamer van Koophandel?");
+		questionTextPerRole.put("BEOORDELAAR", "Is de aanvrager ingeschreven bij de Kamer van Koophandel?");
+		explainTextPerRole.put("AANVRAGER",
+				"Hiermee kunnen we uw openbare gegevens opvragen en zonder extra vragen gegevens verzamelen over uw commerciele activiteiten");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Indien het geval, dan kan deze basisadministratie worden gebruikt.");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
@@ -745,6 +851,13 @@ public class DataPoint {
 	private void initDataPoint_BUSINESSACTIVITIES() {
 		DataPoint newDP;
 		AllowedValue newValue;
+		
+		questionTextPerRole.put("AANVRAGER", "Wat is de aard van de activiteiten in uw bedrijf?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de aard van de bedrijfsactiviteiten?");
+		explainTextPerRole.put("AANVRAGER",
+				"Wij vragen dit om het effect of risico op de wijk vast te kunnen stellen");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Nodig om vast te stellen of deze passen bij beroepen aan huis in categorie B");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
@@ -753,7 +866,7 @@ public class DataPoint {
 		newDP.setDefaultValue("false");
 
 		newDP.setQuestionText("Wat is de aard van uw bedrijfsactiviteiten?");
-		newDP.setExplanationText("Wij vragen dit om het effect/risico op de wijk vast te kunnen stellen");
+		newDP.setExplanationText("Wij vragen dit om het effect of risico op de wijk vast te kunnen stellen");
 
 		newValue = new AllowedValue();
 		newValue.setCode("WEBSHOP");
@@ -767,7 +880,7 @@ public class DataPoint {
 
 		newValue = new AllowedValue();
 		newValue.setCode("EDUCATION");
-		newValue.setDisplayText("Eductatie");
+		newValue.setDisplayText("Educatie");
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
@@ -783,6 +896,15 @@ public class DataPoint {
 
 	private void initDataPoint_MAX_WIDTH_GARDEN() {
 		DataPoint newDP;
+		
+		
+		questionTextPerRole.put("AANVRAGER", "Wat is de breedte op het breedste punt in de tuin?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de maximale breedte van de tuin?");
+		explainTextPerRole.put("AANVRAGER",
+				"Dit vragen wij om de oppervlakte van de tuin te berekenen");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Zie definities, nodig om oppervlakte tuin te berekenen");
+
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
@@ -796,6 +918,13 @@ public class DataPoint {
 
 	private void initDataPoint_MAX_LENGTH_GARDEN() {
 		DataPoint newDP;
+		
+		questionTextPerRole.put("AANVRAGER", "Wat is de lengte op het breedste punt in de tuin?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is de maximale lengte van de tuin?");
+		explainTextPerRole.put("AANVRAGER",
+				"Dit vragen wij om de oppervlakte van de tuin te berekenen");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Zie definities, nodig om oppervlakte tuin te berekenen");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
@@ -809,6 +938,15 @@ public class DataPoint {
 	private void initDataPoint_SURFACE_CALCULATED_GARDEN() {
 		DataPoint newDP;
 
+		
+		questionTextPerRole.put("AANVRAGER", "Oppervlakte tuin");
+		questionTextPerRole.put("BEOORDELAAR", "Oppervlakte tuin");
+		explainTextPerRole.put("AANVRAGER",
+				"Het aandeel dat de tuin inneemt t.o.v oppervlakte van het bouwperceel.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Het aandeel dat de tuin inneemt t.o.v oppervlakte van het bouwperceel.");
+
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -820,7 +958,13 @@ public class DataPoint {
 
 	private void initDataPoint_CHAMBREOFCOMMERCEDOSSIERNUMBER() {
 		DataPoint newDP;
-
+		questionTextPerRole.put("AANVRAGER", "Onder welke KVK nummer staat u ingeschreven?");
+		questionTextPerRole.put("BEOORDELAAR", "Het KVK nummer van de aanvrager");
+		explainTextPerRole.put("AANVRAGER",
+				"Dit wordt gebruikt om gegevens uit de basis administratie op te vragen, zodat u deze niet zelf hoeft te verstrekken.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"De basisadministratie KVK zal worden geraadpleegd om feiten te verzamelen");
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
 		newDP.setDataType(DataPoint.DP_dataType.TEXT);
@@ -832,7 +976,12 @@ public class DataPoint {
 
 	private void initDataPoint_PERC_WATER_PERM_GARDEN() {
 		DataPoint newDP;
-
+		questionTextPerRole.put("AANVRAGER", "Vastgesteld percentage watertoelatend gebied");
+		questionTextPerRole.put("BEOORDELAAR", "Het percentage oppervlakte dat water toelatend is.");
+		explainTextPerRole.put("AANVRAGER",
+				"Belangrijk om risico op wateroverlast vast te stellen.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Wordt gebruikt om risico op wateroverlast vast te stellen.");
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.OTHER);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -844,19 +993,33 @@ public class DataPoint {
 
 	private void initDataPoint_SURFACE_TILES_GARDEN() {
 		DataPoint newDP;
+		
+		questionTextPerRole.put("AANVRAGER", "Welk deel van de oppervlakte van de tuin zal worden verhard?");
+		questionTextPerRole.put("BEOORDELAAR", "Hoe groot is het verharde deel van de tuin?");
+		explainTextPerRole.put("AANVRAGER",
+				"Verharding geeft invloed op de watertoelatendheid");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Het verharde deel heeft invloed op de watertoelatendheid.");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
 		newDP.setDataPointType(DataPoint.DP_Type.SURFACE_TILES_GARDEN);
 
-		newDP.setQuestionText("Oppervlakte verhanding tuin");
+		newDP.setQuestionText("Oppervlakte verharding tuin");
 		newDP.setExplanationText("Wij vragen dit de totale watertoelatendheid vast te stellen van de tuin");
 
 	}
 
 	private void initDataPoint_DESIGN_HAS_GARDEN() {
 		DataPoint newDP;
+		
+		questionTextPerRole.put("AANVRAGER", "Is er een voornemen om een tuin aan te leggen?");
+		questionTextPerRole.put("BEOORDELAAR", "Bevat het ontwerp een tuin?");
+		explainTextPerRole.put("AANVRAGER",
+				"Een tuin heeft invloed op de watertoelatendheid van het perceel.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Een tuin heeft invloed op de watertoelatendheid van het perceel.");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
@@ -871,6 +1034,14 @@ public class DataPoint {
 	private void initDataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE() {
 		DataPoint newDP;
 
+		questionTextPerRole.put("AANVRAGER", "Totale oppervlakte van het niet waterdoorlatend deel");
+		questionTextPerRole.put("BEOORDELAAR", "Totaal oppervlakte niet waterdoorlatend deel");
+		explainTextPerRole.put("AANVRAGER",
+				"Het niet water doorlatend deel van het perceel wordt beoordeeld in het risico op wateroverlast.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Dit feit bepaald de kans op potentiele wateroverlast.");
+
+		
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.DESIGN);
 		newDP.setDataType(DataPoint.DP_dataType.NUMBER);
@@ -885,6 +1056,13 @@ public class DataPoint {
 	private void initDataPoint_PROFESSION_AT_HOME() {
 		DataPoint newDP;
 		AllowedValue newValue;
+		
+		questionTextPerRole.put("AANVRAGER", "Wat is uw beroep?");
+		questionTextPerRole.put("BEOORDELAAR", "Wat is het beroep van de aanvrager?");
+		explainTextPerRole.put("AANVRAGER",
+				"Beroepen aan huis zijn toegestaan, mits zij geen potentieel risico vormen voor de directe leefomgeving.");
+		explainTextPerRole.put("BEOORDELAAR",
+				"Aanvrager dient aan te tonen dat beroep in categorie B van beroepen valt.");
 
 		newDP = this;
 		newDP.setDataPointCategory(DataPoint.DP_category.ACTIVITY);
@@ -893,8 +1071,7 @@ public class DataPoint {
 		newDP.setDefaultValue("OTHER");
 		newDP.setAskable(true);
 
-		newDP.setQuestionText("Beroep uitgeoefend aan huis");
-		newDP.setExplanationText("Nodig om te beoordelen of dit beroep risico's met zich mee brengt voor de omgeving");
+	
 
 		newValue = new AllowedValue();
 		newValue.setCode("CONSULTANCY");
@@ -913,7 +1090,7 @@ public class DataPoint {
 
 		newValue = new AllowedValue();
 		newValue.setCode("ACCOUNTANT");
-		newValue.setDisplayText("Accountancy");
+		newValue.setDisplayText("Accountant");
 		newDP.addAllowedValue(newValue);
 
 		newValue = new AllowedValue();
@@ -928,7 +1105,7 @@ public class DataPoint {
 
 		newValue = new AllowedValue();
 		newValue.setCode("OTHER");
-		newValue.setDisplayText("Ander beroep");
+		newValue.setDisplayText("Een ander beroep dan hierboven vermeld.");
 		newDP.addAllowedValue(newValue);
 	}
 
@@ -979,7 +1156,9 @@ public class DataPoint {
 			this.initDataPoint_REGISTEREDDUTCHKVK();
 		} else if (aDPtype.equals(DataPoint.DP_Type.SBI_ORGANISATION)) {
 			this.initDataPoint_SBI_ORGANISATION();
-		} else
+		} else if (aDPtype.equals(DataPoint.DP_Type.WORK_FROM_HOME)) {
+			this.initDataPoint_WORK_FROM_HOME();
+		} 
 			ServerGlobals.getInstance().log("ERROR: No init entry for " + aDPtype);
 
 	}

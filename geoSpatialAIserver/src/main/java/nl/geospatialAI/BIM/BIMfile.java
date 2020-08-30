@@ -134,7 +134,8 @@ public class BIMfile {
 			this.setObjectWidth(32.68);
 			this.setFootPrint(317.78);
 			this.setObjectLength(42.5);
-			this.setFootPrintGarden(115);
+			this.setFootPrintGarden(0);
+			this.setHasGarden(false);
 
 		} 
 		else {

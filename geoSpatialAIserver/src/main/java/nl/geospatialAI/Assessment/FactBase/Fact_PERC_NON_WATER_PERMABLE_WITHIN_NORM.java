@@ -30,7 +30,7 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 		double percNonPerm;
 		double percNonPerm_afgerond;
 
-		norm = 25.0;
+		norm = theCase.GetNormPercWaterPermable();
 
 		dp_SurfPane = theCase.getCaseDataPointByType(theServerGlobals, theReply,
 				DataPoint.DP_Type.SURFACE_CALCULATED_DESTINATIONPANE);
@@ -51,11 +51,11 @@ public class Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM extends Fact {
 				percNonPerm_afgerond = theServerGlobals.round((percNonPerm * 100), 2);
 				if (percNonPerm <= ((100.0 - norm) / 100.0)) {
 					this.setFactResult(Fact.tFactClassificationType.TRUE);
-					this.addToExplanation("OK: Percentage aandeel niet watertoelatend deel perceel ["
-							+ (percNonPerm_afgerond) + "%] ligt binnen de norm van " + (100 - norm) + "%.");
+					this.addToExplanation("Het percentage niet watertoelatend deel van het perceel ["
+							+ (percNonPerm_afgerond) + "%] ligt BINNEN de norm van " + (100 - norm) + "%.");
 				} else {
 					this.setFactResult(Fact.tFactClassificationType.FALSE);
-					this.addToExplanation("NIET OK: Percentage aandeel niet watertoelatend deel perceel ["
+					this.addToExplanation("Het percentage niet watertoelatend deel van het perceel ["
 							+ (percNonPerm_afgerond) + "%] ligt boven de norm van " + (100 - norm) + "%.");
 				}
 

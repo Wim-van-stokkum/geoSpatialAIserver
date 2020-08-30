@@ -35,19 +35,19 @@ public class Risk {
 	private tRiskClassificationType riskValue;
 	private String policyReference;
 	private List<Proof> myProofs;
+	private boolean evaluated;
 	private boolean aValueSet = false;
 	private Proof.tProofClassificationType proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
-    public String explanation;
-    private tAssessmentCriteriumCategoryType myAssessmentCriterium;
-    
-    @JsonIgnore
-    private boolean needInput;
-    
-    @JsonIgnore
+	public String explanation;
+	private tAssessmentCriteriumCategoryType myAssessmentCriterium;
+
+	@JsonIgnore
+	private boolean needInput;
+
+	@JsonIgnore
 	public boolean getNeedInput() {
 		return this.needInput;
 	}
-    
 
 	public tAssessmentCriteriumCategoryType getMyAssessmentCriterium() {
 		return myAssessmentCriterium;
@@ -63,43 +63,45 @@ public class Risk {
 
 		risk_refID = risk_refID + 1;
 		this.setRefID(risk_refID);
-	 this.clearExplanation();
+		this.clearExplanation();
 
 		// initialize proofs
 		this.myProofs = new ArrayList<Proof>();
-
+		this.evaluated = false;
 	}
-	
+
+	public boolean isEvaluated() {
+		return this.evaluated;
+	}
+
 	private void clearExplanation() {
 		this.explanation = "";
 	}
 
 	protected void addToExplanation(String aText) {
-		if (this.explanation.length() == 0) {
-			this.explanation = aText;
-		}
-		else {
-			this.explanation = this.explanation + " " +  aText;
-		}
-		
-	}
+		if (aText != null) {
+			if (aText.length() > 0) {
 
+				if (this.explanation.length() == 0) {
+					this.explanation = aText;
+				} else {
+					this.explanation = this.explanation + " " + aText;
+				}
+			}
+		}
+	}
 
 	@JsonIgnore
 	public String explainYourSelf() {
 		return this.explanation;
 	}
-	
+
 	public String getPolicyReference() {
 		return policyReference;
 	}
 
-	
-
-	
-	
-   @JsonIgnore
-    public tOperandType getOperand() {
+	@JsonIgnore
+	public tOperandType getOperand() {
 		return myOperand;
 	}
 
@@ -153,26 +155,27 @@ public class Risk {
 
 	// Risk Evaluatie methods
 
-	private void evalProofasAND(ServerGlobals theServerGlobals,  Case theCase, AssessRequestReply theReply , boolean exhaustive) {
+	private void evalProofasAND(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 		boolean breakBecauseNeedInput;
 
 		// Proof all underlying proofs
 		breakBecauseNeedInput = false;
-		for (i = 0; ( ( i < this.myProofs.size()) && (breakBecauseNeedInput == false))  ; i++) {
+		for (i = 0; ((i < this.myProofs.size()) && (breakBecauseNeedInput == false)); i++) {
 			aProofResult = myProofs.get(i).assessProof(theServerGlobals, theCase, theReply, 1, exhaustive);
 			this.addToExplanation(myProofs.get(i).explainYourSelf());
 			breakBecauseNeedInput = myProofs.get(i).getNeedInput();
 			if (breakBecauseNeedInput) {
 				this.needInput = true;
 			}
-			
+
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				this.proofOverallResult = Proof.tProofClassificationType.NEGATIVE;
 				aValueSet = true;
-	//			theServerGlobals.log("Overall impact: evaluatie naar negatief vanwege AND");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact: evaluatie naar negatief vanwege AND");
+				// theServerGlobals.log("");
 
 			} else if (aProofResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 				// Negative remain Negative : no action
@@ -183,8 +186,8 @@ public class Risk {
 					if (this.aValueSet == false) {
 						// flip undetermined first time to positive
 
-		//				theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
-			//			theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: evaluatie va onbekend naar positief");
+						// theServerGlobals.log("");
 
 						this.proofOverallResult = Proof.tProofClassificationType.POSITIVE;
 						this.aValueSet = true;
@@ -198,15 +201,15 @@ public class Risk {
 					this.proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
 					this.aValueSet = true;
 
-	//				theServerGlobals.log("Overall impact : positief wordt onbekend");
-		//			theServerGlobals.log("");
+					// theServerGlobals.log("Overall impact : positief wordt onbekend");
+					// theServerGlobals.log("");
 
 				}
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (aValueSet == false) {
 
-	//					theServerGlobals.log("Overall impact: fixeer onbekend");
-	//					theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: fixeer onbekend");
+						// theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -218,8 +221,8 @@ public class Risk {
 			if ((exhaustive == false) && (proofOverallResult.equals(Proof.tProofClassificationType.NEGATIVE))
 					&& (i < (this.myProofs.size() - 1))) {
 
-	//			theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
-	//					+ ". Een van onderliggende bewijzen zijn negatief en operand is AND");
+				// theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
+				// + ". Een van onderliggende bewijzen zijn negatief en operand is AND");
 				this.clearExplanation();
 
 				break;
@@ -228,21 +231,22 @@ public class Risk {
 		}
 	}
 
-	private void evalProofasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive) {
+	private void evalProofasOR(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive) {
 		int i;
 		Proof.tProofClassificationType aProofResult;
 		boolean breakBecauseNeedInput;
 
 		// Proof all underlying proofs
 		breakBecauseNeedInput = false;
-		for (i = 0; ( ( i < this.myProofs.size()) && (breakBecauseNeedInput == false))  ; i++) {
+		for (i = 0; ((i < this.myProofs.size()) && (breakBecauseNeedInput == false)); i++) {
 			aProofResult = myProofs.get(i).assessProof(theServerGlobals, theCase, theReply, 1, exhaustive);
 			this.addToExplanation(myProofs.get(i).explainYourSelf());
 			breakBecauseNeedInput = myProofs.get(i).getNeedInput();
 			if (breakBecauseNeedInput) {
 				this.needInput = true;
 			}
-			
+
 			if (aProofResult.equals(Proof.tProofClassificationType.NEGATIVE)) {
 				// Positive stay positive
 				// Negative stays negative
@@ -252,14 +256,14 @@ public class Risk {
 					aValueSet = true;
 				}
 
-		//		theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact: evaluatie van onbekend naar negatief");
+				// theServerGlobals.log("");
 
 			} else if (aProofResult.equals(Proof.tProofClassificationType.POSITIVE)) {
 				// Bij OR wordt resultaat POSITIEF: no matter waht the other will be
 
-	//			theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
-	//			theServerGlobals.log("");
+				// theServerGlobals.log("Overall impact : evaluatie naar positief vanwege OR");
+				// theServerGlobals.log("");
 
 				this.proofOverallResult = Proof.tProofClassificationType.POSITIVE;
 				this.aValueSet = true;
@@ -272,14 +276,14 @@ public class Risk {
 					this.aValueSet = true;
 
 //					theServerGlobals.log("Overall impact : negatief wordt onbekend");
-		//			theServerGlobals.log("");
+					// theServerGlobals.log("");
 
 				}
 				if (this.proofOverallResult.equals(Proof.tProofClassificationType.UNDETERMINED)) {
 					if (aValueSet == false) {
 
-		//				theServerGlobals.log("Overall impact: fixeer onbekend");
-		//				theServerGlobals.log("");
+						// theServerGlobals.log("Overall impact: fixeer onbekend");
+						// theServerGlobals.log("");
 
 						this.aValueSet = true;
 					}
@@ -287,20 +291,21 @@ public class Risk {
 				}
 			}
 
-			// Break by first poitieve point ?
+			// Break by first positieve point ?
 			if ((exhaustive == false) && (proofOverallResult.equals(Proof.tProofClassificationType.POSITIVE))
 					&& (i < (this.myProofs.size() - 1))) {
 
-	//			theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
-		//				+ ". Een van onderliggende bewijzen is POSITIEF en operand is OR");
-				this.clearExplanation();
+				// theServerGlobals.log("Stop voortijdig beoordeling van risico " + this.refID
+				// + ". Een van onderliggende bewijzen is POSITIEF en operand is OR");
+
 				break;
 			}
 
 		}
 	}
 
-	public void assessRisk(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply , boolean exhaustive) {
+	public void assessRisk(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
+			boolean exhaustive) {
 
 		// initialize
 		this.proofOverallResult = Proof.tProofClassificationType.UNDETERMINED;
@@ -314,16 +319,17 @@ public class Risk {
 		theServerGlobals.log("=================");
 		theServerGlobals.log("BEOORDEEL RISICO");
 		theServerGlobals.log("=================");
-		theServerGlobals.log( this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log(this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Bron: " + this.getPolicyReference());
 		theServerGlobals.log("");
 
-		
+		this.evaluated = true;
+
 		this.clearExplanation();
 		this.needInput = false;
 		// Evalueer strategie
 		if (this.getOperand().equals(Risk.tOperandType.AND)) {
-			this.evalProofasAND(theServerGlobals, theCase, theReply,  exhaustive);
+			this.evalProofasAND(theServerGlobals, theCase, theReply, exhaustive);
 		} else if (this.getOperand().equals(Risk.tOperandType.OR)) {
 			this.evalProofasOR(theServerGlobals, theCase, theReply, exhaustive);
 		}
@@ -344,7 +350,7 @@ public class Risk {
 		theServerGlobals.log("=================");
 		theServerGlobals.log("BEOORDEELD RISICO");
 		theServerGlobals.log("=================");
-		theServerGlobals.log( this.getDisplayName() + " [id: " + this.refID + "]");
+		theServerGlobals.log(this.getDisplayName() + " [id: " + this.refID + "]");
 		theServerGlobals.log("Bron: " + this.getPolicyReference());
 		theServerGlobals.log("Bewijzen: " + proofOverallResult);
 		theServerGlobals.log("Operand: " + this.myOperand);
@@ -355,18 +361,20 @@ public class Risk {
 
 	}
 
-
-
 	public void justifyTheProofs(ServerGlobals theServerGlobals, Case correspondingCase, Risk aRisk,
 			JustificationRisk justificationRisk) {
-	    int i;
-	    Proof aProof;
-	    
-	    for (i = 0 ; i< this.myProofs.size();  i ++) {
-	    	aProof = this.myProofs.get(i);
-	    	aProof.justifyProof(theServerGlobals,correspondingCase, aRisk,justificationRisk  );
-	    }
+		int i;
+		Proof aProof;
+
+		for (i = 0; i < this.myProofs.size(); i++) {
+			aProof = this.myProofs.get(i);
+			if (aProof.isEvaluated()) {
+				aProof.justifyProof(theServerGlobals, correspondingCase, aRisk, justificationRisk);
 		
+			}
+		}
+		
+
 	}
 
 }

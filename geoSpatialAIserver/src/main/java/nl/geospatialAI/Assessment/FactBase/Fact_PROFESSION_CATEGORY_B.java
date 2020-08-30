@@ -95,14 +95,14 @@ public class Fact_PROFESSION_CATEGORY_B extends Fact {
 					valueKnown = true;
 					this.addToExplanation("SBI code " + theKVKdetails.getCodeSBI() + " (" + theKVKdetails.getSBIname()
 							+ ") van organisatie " + theKVKdetails.getCompanyName() + " [KVK:"
-							+ theKVKdetails.getDossierNumber() + "] wordt gerekend tot beroepen in categorie B");
+							+ theKVKdetails.getDossierNumber() + "] wordt gerekend tot beroepen die toegestaan zijn vanuit een woonhuis.");
 				} else {
 					professionCatB = false;
 					valueKnown = true;
 					
 					this.addToExplanation("SBI code " + theKVKdetails.getCodeSBI() + " (" + theKVKdetails.getSBIname()
 							+ ") van organisatie " + theKVKdetails.getCompanyName() + " [KVK:"
-							+ theKVKdetails.getDossierNumber() + "] wordt NIET gerekend tot beroepen in categorie B");
+							+ theKVKdetails.getDossierNumber() + "] wordt NIET gerekend tot beroepen die toegestaan zijn vanuit een woonhuis.");
 				}
 			}
 		}

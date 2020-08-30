@@ -6,7 +6,7 @@ import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
-public class Fact_OBJECT_IS_OFFICE extends Fact {
+public class Fact_NO_WORK_FROM_HOME extends Fact {
 	@Override
 	protected void evaluateFactResult(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply,
 			int level, boolean exhaustive) {
@@ -14,53 +14,56 @@ public class Fact_OBJECT_IS_OFFICE extends Fact {
 
 		this.resetUsedDataPoints();
 		this.clearExplanation();
+
 		this.evaluateValue(theServerGlobals, theCase, theReply, level, exhaustive);
 
 	}
 
 	private void evaluateValue(ServerGlobals theServerGlobals, Case theCase, AssessRequestReply theReply, int level,
 			boolean exhaustive) {
-		DataPoint dp_Purpose_HM_OBJECT;
+		DataPoint dp_Activity_Work_From_Home;
 
-		String purposeValue;
-		boolean isOffice;
+
+		boolean workFromHome;
 		boolean valueKnown;
 
 		// init
-		isOffice = false;
+	
 		valueKnown = false;
-		purposeValue = "";
+		workFromHome = false;
 
-		dp_Purpose_HM_OBJECT = theCase.getCaseDataPointByType(theServerGlobals, theReply,
-				DataPoint.DP_Type.PURPOSE_HM_OBJECT);
+		dp_Activity_Work_From_Home = theCase.getCaseDataPointByType(theServerGlobals, theReply,
+				DataPoint.DP_Type.WORK_FROM_HOME);
 
-		if (dp_Purpose_HM_OBJECT.hasValue()) {
-			this.recordUsedDataPoint(dp_Purpose_HM_OBJECT);
-			purposeValue = dp_Purpose_HM_OBJECT.getConvertedValueString();
+		if (dp_Activity_Work_From_Home.hasValue()) {
+			this.recordUsedDataPoint(dp_Activity_Work_From_Home);
+			workFromHome = dp_Activity_Work_From_Home.getConvertedValueBoolean();
 
-			if (purposeValue.equals("KANTOORACTIVITEITEN")) {
-				isOffice = true;
+			if (workFromHome) {
 				valueKnown = true;
-				this.addToExplanation("Er zullen kantooractiviteiten worden uitgevoerd in het gebouw.");
+				this.addToExplanation("Er zal vanuit huis worden gewerkt.");
 			} else {
-				isOffice = false;
+			
 				valueKnown = true;
-				this.addToExplanation("Er zullen geen kantooractiviteiten worden uitgevoerd in het gebouw.");
+				this.addToExplanation("Er zal NIET vanuit huis worden gewerkt.");
 			}
 
 		}
+		
 
 		if (valueKnown) {
-			if (isOffice == true) {
-				this.setFactResult(Fact.tFactClassificationType.TRUE);
-			} else if (isOffice == false) {
+			if (workFromHome == true) {
 				this.setFactResult(Fact.tFactClassificationType.FALSE);
+			} else if (workFromHome == false) {
+				this.setFactResult(Fact.tFactClassificationType.TRUE);
 			}
-
-		} 	else {
+			this.needInput = false;
+		}
+		else {
 			this.needInput = true;
 		}
 
 	}
-
 }
+
+

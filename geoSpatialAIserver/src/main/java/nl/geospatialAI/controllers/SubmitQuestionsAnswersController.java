@@ -40,6 +40,13 @@ public class SubmitQuestionsAnswersController {
 		// create the reply
 		theSubmitReply = new AssessRequestReply();
 		BIMfile_statusknown = false;
+		theSubmitReply.setUserType( AssessRequestContext.tUsertype.AANVRAGER);
+		if (aRequest.getUsertype() != null) {
+			if (aRequest.getUsertype().equals( AssessRequestContext.tUsertype.BEOORDELAAR)) {
+				theSubmitReply.setUserType( AssessRequestContext.tUsertype.BEOORDELAAR);
+	
+			}
+		}
 
 		// process the request
 		// - Get The corresponding (anomynous) case
@@ -75,6 +82,7 @@ public class SubmitQuestionsAnswersController {
 
 		// sent the reply
 		if (correspondingCase != null) {
+			correspondingCase.setForUser(theSubmitReply);
 			theSubmitReply.setReferenceID(correspondingCase.getCaseNo());
 			theSubmitReply.EvalStatus();
 		}

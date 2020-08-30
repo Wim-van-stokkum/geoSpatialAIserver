@@ -33,7 +33,7 @@ public class Fact_OFFICE_HEIGHT_WITHIN_NORM extends Fact {
 		valueKnown = false;
 		objHeight = 0.0;
 
-		norm = 13.5;
+		norm = theCase.GetNormMaxOffice();
 		roundedNorm = theServerGlobals.round(norm, 1);
 		roundedHeight = 0.0;
 		withinLimit = false;
@@ -49,7 +49,7 @@ public class Fact_OFFICE_HEIGHT_WITHIN_NORM extends Fact {
 				withinLimit = true;
 				valueKnown = true;
 				this.addToExplanation(
-						"Hoogte kantoor [" + roundedHeight + "] valt binnen norm van: " + roundedNorm + " meter");
+						"Hoogte kantoor [" + roundedHeight + "] valt BINNEN norm van: " + roundedNorm + " meter");
 			} else {
 				withinLimit = false;
 				valueKnown = true;

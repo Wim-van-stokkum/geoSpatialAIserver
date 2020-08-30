@@ -1,12 +1,14 @@
 package nl.geospatialAI.Assessment;
 
 import nl.geospatialAI.Assessment.FactBase.Fact_HOUSE_HEIGHT_WITHIN_NORM;
+import nl.geospatialAI.Assessment.FactBase.Fact_NO_WORK_FROM_HOME;
 import nl.geospatialAI.Assessment.FactBase.Fact_OBJECT_IS_COMMERCIAL_BUILDING;
 import nl.geospatialAI.Assessment.FactBase.Fact_OBJECT_IS_HOUSE;
 import nl.geospatialAI.Assessment.FactBase.Fact_OBJECT_IS_OFFICE;
 import nl.geospatialAI.Assessment.FactBase.Fact_OFFICE_HEIGHT_WITHIN_NORM;
 import nl.geospatialAI.Assessment.FactBase.Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM;
 import nl.geospatialAI.Assessment.FactBase.Fact_PROFESSION_CATEGORY_B;
+import nl.geospatialAI.Assessment.FactBase.Fact_WORK_FROM_HOME;
 import nl.geospatialAI.Case.Case;
 import nl.geospatialAI.DataPoints.DataPoint;
 import nl.geospatialAI.DataPoints.derivedDataPoints.DataPoint_TOTAL_SURFACE_WATER_NON_PERMABLE;
@@ -94,6 +96,8 @@ public class PolicyLibrary {
 		// temp
 		subProof = this.createProof_OBJECT_MEANT_FOR_COMMERCIAL_USE(Proof.tProofClassificationType.UNDETERMINED);
 		newRisk.addProof(subProof);
+		subProof = this.createProof_NO_WORK_FROM_HOME(Proof.tProofClassificationType.UNDETERMINED);
+		newRisk.addProof(subProof);
 		subProof = this.createProof_ALLOWED_PROFFESION_AT_HOUSE(Proof.tProofClassificationType.UNDETERMINED);
 		newRisk.addProof(subProof);
 		newRisk.evaluateAsOr();
@@ -117,6 +121,26 @@ public class PolicyLibrary {
 		return newProof;
 	}
 
+	
+	
+	public Proof createProof_NO_WORK_FROM_HOME(Proof.tProofClassificationType initValue) {
+		Proof newProof;
+		Fact newFact;
+
+		newProof = new Proof();
+		newProof.setProofCategory(Proof.tProofCategoryType.NO_WORK_FROM_HOME);
+		newProof.setDisplayName("Bewijs: er wordt niet vanuit huis gewerkt");
+
+		newProof.setPolicyReference("Artikel 12.5.d, bestemmingsplan oost");
+		
+
+		newFact = createFact_NO_WORK_FROM_HOME(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
+		
+		
+		return newProof;
+	}
+	
 	public Proof createProof_ALLOWED_PROFFESION_AT_HOUSE(Proof.tProofClassificationType initValue) {
 		Proof newProof;
 		Fact newFact;
@@ -130,7 +154,8 @@ public class PolicyLibrary {
 		newFact = createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
 		
-
+		newFact = createFact_WORK_FROM_HOME(Fact.tFactClassificationType.UNKNOWN);
+		newProof.addFacts(newFact);
 		
 		newFact = createFact_PROFESSION_CATEGORY_B(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -376,6 +401,37 @@ public class PolicyLibrary {
 
 	}
 
+	
+	public Fact createFact_WORK_FROM_HOME(Fact.tFactClassificationType initValue) {
+		Fact_WORK_FROM_HOME newFact;
+
+		newFact = new Fact_WORK_FROM_HOME();
+		newFact.setFactType(Fact.tFactType.WORK_FROM_HOME);
+		newFact.setDisplayName("Feit: aanvrager gaat werken vanuit huis.");
+		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
+			newFact.setFactResult(initValue);
+		}
+
+		newFact.setPolicyReference("Bestemmingsplan 12.2");
+		return newFact;
+
+	}
+	
+	
+	public Fact createFact_NO_WORK_FROM_HOME(Fact.tFactClassificationType initValue) {
+		Fact_NO_WORK_FROM_HOME newFact;
+
+		newFact = new Fact_NO_WORK_FROM_HOME();
+		newFact.setFactType(Fact.tFactType.NO_WORK_FROM_HOME);
+		newFact.setDisplayName("Feit: aanvrager gaat niet werken vanuit huis.");
+		if (initValue.equals(Fact.tFactClassificationType.UNKNOWN) == false) {
+			newFact.setFactResult(initValue);
+		}
+
+		newFact.setPolicyReference("Bestemmingsplan 12.2");
+		return newFact;
+
+	}
 	// DATAPOINTS
 	// =================================================================================================================================
 
@@ -391,6 +447,19 @@ public class PolicyLibrary {
 
 	}
 
+	
+	public DataPoint createDataPoint_WORK_AT_HOME(Case theCase, ServerGlobals theServiceGlobals,
+			AssessRequestReply theReply) {
+
+		DataPoint newDP;
+
+		newDP = new DataPoint(DataPoint.DP_Type.WORK_FROM_HOME);
+
+		theCase.getTheHumanMadeObject().addRequestedDataPoint(newDP);
+		return newDP;
+
+	}
+	
 	public DataPoint createDataPoint_REGISTEREDDUTCHKVK(Case theCase, ServerGlobals theServiceGlobals,
 			AssessRequestReply theReply) {
 
@@ -484,17 +553,18 @@ public class PolicyLibrary {
 					newDP.setValue("HANDELSGEBOUW");
 					newDP.setDatapointSource(DataPoint.DP_source.DIGITAL_TWIN);
 				}
+				newDP.setAskable(false);
 			}
-			else {
-				// BIM
-				if (theCase.hasBIM()) {
+			
+			// BIM
+			if (theCase.hasBIM()) {
 
 					newDP.setValue(theCase.theBIMfile.getGebouwType().toString());
 					newDP.setDatapointSource(DataPoint.DP_source.DESIGN_FILE);
 					newDP.setAskable(false);
 
 				}
-			}
+			
 
 		}
 

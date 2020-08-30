@@ -43,11 +43,11 @@ public class Fact_OBJECT_IS_HOUSE extends Fact {
 			if (purposeValue.equals("WONEN")) {
 				isHouse = true;
 				valueKnown = true;
-				this.addToExplanation("Activiteit WONEN  is onderdeel van doel object.");
+				this.addToExplanation("Er zal inderdaad gewoond gaan worden in het gebouw.");
 			} else {
 				isHouse = false;
 				valueKnown = true;
-				this.addToExplanation("Activiteit WONEN is geen onderdeel van doel object");
+				this.addToExplanation("Er zal niet gewoond gaan worden in het gebouw.");
 			}
 
 		}
