@@ -3,6 +3,8 @@ package nl.geospatialAI.Justification;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import nl.geospatialAI.Assessment.AssessmentCriterium.tAssessmentCriteriumCategoryType;
 import nl.geospatialAI.Assessment.Risk;
 import nl.geospatialAI.Assessment.Risk.tRiskCategoryType;
@@ -20,12 +22,17 @@ public class JustificationRisk {
 	public tRiskClassificationType riskValue;
 
 	public String explanation;
+	
+
+	
     public List<JustificationProof> underlyingProofResults;
 
 	
 	public JustificationRisk(Risk aRisk, ServerGlobals theServerGlobals, Case correspondingCase,
 			JustifyRiskReply justifyRiskReply) {
-
+        String wijk;
+        String policyName;
+        
 		
 		this.refID = aRisk.getRefID();
 		this.riskCategory = aRisk.getRiskCategory();
@@ -34,7 +41,10 @@ public class JustificationRisk {
 		this.displayName = aRisk.getDisplayName();
 		this.riskValue = aRisk.getRiskValue();
 		if (aRisk.isEvaluated()) { 
-		this.explanation = aRisk.explainYourSelf();
+		wijk = this.explanation = "Op basis van postcode is wijk: " + correspondingCase.getContextLocation().GetWijk() + " vastgesteld.";
+		policyName = "Beleid van toepassing is: " + correspondingCase.thePolicy.getApplicablePolicyName();
+		this.explanation = wijk + " " + policyName + " "+   aRisk.explainYourSelf();
+		
 		} else {
 			this.explanation = "Dit risico is niet betrokken in de beoordeling.";
 		}

@@ -1158,9 +1158,9 @@ public class DataPoint {
 			this.initDataPoint_SBI_ORGANISATION();
 		} else if (aDPtype.equals(DataPoint.DP_Type.WORK_FROM_HOME)) {
 			this.initDataPoint_WORK_FROM_HOME();
-		} 
+		} else {
 			ServerGlobals.getInstance().log("ERROR: No init entry for " + aDPtype);
-
+		} 
 	}
 
 	public void justifyDataPoint(ServerGlobals theServerGlobals, Case correspondingCase,

@@ -1,5 +1,7 @@
 package nl.geospatialAI.caseContext;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Location {
     private String zipCode;
     private String city;
@@ -61,6 +63,31 @@ public class Location {
 		this.bouwKavelNr = bouwKavelNr;
 	}
 	
+	@JsonIgnore
+	public String GetWijk() {
+		String wijk;
+		
+		wijk = "Stedenwijk en weerwater Noord";
+		if (this.getZipCode().startsWith("1324")) {
+			wijk = "Almere Stedenwijk en weerwater Noord";
+		} else
+		if (this.getZipCode().startsWith("1315")) {
+			wijk = "Almere Centrum";
+		}
+		else
+			if (this.getZipCode().startsWith("1323")) {
+				wijk = "Almere Muziekwijk Zuid";
+			}
+			else
+				if (this.getZipCode().startsWith("1312")) {
+					wijk = "Almere Muziekwijk Noord";
+				}
+		
+		
+		
+		return wijk;
+		
+	}
     
     
     

@@ -130,11 +130,11 @@ public class BIMfile {
 			this.setActiviteitType(BIMfile.t_BIM_activiteitenType.KANTOORACTIVITEITEN);
 			this.setGebouwType(BIMfile.t_BIM_gebouwenType.KANTOORGEBOUW);
 
-			this.setObjectHeight(15.11);
-			this.setObjectWidth(32.68);
-			this.setFootPrint(317.78);
-			this.setObjectLength(42.5);
-			this.setFootPrintGarden(0);
+			this.setObjectHeight(357.11);
+			this.setObjectWidth(213.68);
+			this.setFootPrint(5234.78);
+			this.setObjectLength(78.5);
+			this.setFootPrintGarden(29);
 			this.setHasGarden(false);
 
 		} 

@@ -18,6 +18,12 @@ import nl.geospatialAI.beans.AssessRequestReply;
 import nl.geospatialAI.serverGlobals.ServerGlobals;
 
 public class PolicyLibrary {
+	public enum supportedPolicies {
+		POLICY_STEDENWIJK_WEERWATER_NOORD,
+		POLICY_CENTRUM,
+		POLICY_MUZIEKWIJK_NOORD,
+		POLICY_MUZIEKWIJK_ZUID
+	}
 	private int refID = 1000;
 
 	public int getRefID() {
@@ -46,7 +52,7 @@ public class PolicyLibrary {
 		newRisk.setRiskCategory(Risk.tRiskCategoryType.WATER_PERMABILITY);
 		newRisk.setDisplayName("Risico: Water doorlatendheid");
 
-		newRisk.setPolicyReference("Artikel 12.1, bestemmingsplan oost");
+		newRisk.setPolicyReference("Artikel 12.1, watermanagement beleid Almere.");
 		newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.WATER);
 		myProof = this.createProof_SURFACE_WATER_NON_PERM_ACCEPTABLE(Proof.tProofClassificationType.UNDETERMINED);
 		newRisk.addProof(myProof);
@@ -63,7 +69,7 @@ public class PolicyLibrary {
 		newRisk.setRiskCategory(Risk.tRiskCategoryType.ENVIRONMENTAL);
 		newRisk.setDisplayName("Risico: horizon vervuiling");
 
-		newRisk.setPolicyReference("Artikel 14.2, bestemmingsplan oost");
+		newRisk.setPolicyReference("Artikel 14.2, bestemmingsplan");
 		newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.LIVING_ENVIRONMENT);
 		// myProof =
 		// this.createProof_UNDER_MAX_HEIGHT(Proof.tProofClassificationType.UNDETERMINED);
@@ -90,7 +96,7 @@ public class PolicyLibrary {
 		newRisk.setRiskCategory(Risk.tRiskCategoryType.PURPOSE);
 		newRisk.setDisplayName("Risico: onverantwoord commercieel gebruik");
 
-		newRisk.setPolicyReference("Artikel 12.2, bestemmingsplan oost");
+		newRisk.setPolicyReference("Artikel 18.1.b, bestemmingsplan");
 		newRisk.setMyAssessmentCriterium(AssessmentCriterium.tAssessmentCriteriumCategoryType.PURPOSE);
 
 		// temp
@@ -114,7 +120,7 @@ public class PolicyLibrary {
 		newProof.setProofCategory(Proof.tProofCategoryType.OBJECT_MEANT_FOR_COMMERCIAL_USE);
 		newProof.setDisplayName("Bewijs: object is bestemd voor commerciele activiteiten");
 
-		newProof.setPolicyReference("Artikel 12.25.b, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 18.1.b, bestemmingsplan");
 
 		newFact = createFact_OBJECT_IS_COMMERCIAL_BUILDING(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -131,7 +137,7 @@ public class PolicyLibrary {
 		newProof.setProofCategory(Proof.tProofCategoryType.NO_WORK_FROM_HOME);
 		newProof.setDisplayName("Bewijs: er wordt niet vanuit huis gewerkt");
 
-		newProof.setPolicyReference("Artikel 12.5.d, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 18.1.a, bestemmingsplan");
 		
 
 		newFact = createFact_NO_WORK_FROM_HOME(Fact.tFactClassificationType.UNKNOWN);
@@ -149,7 +155,7 @@ public class PolicyLibrary {
 		newProof.setProofCategory(Proof.tProofCategoryType.ALLOWED_PROFFESION_AT_HOUSE);
 		newProof.setDisplayName("Bewijs: beroep aan huis is toelaatbaar");
 
-		newProof.setPolicyReference("Artikel 12.5.d, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 18.1.b, bestemmingsplan");
 
 		newFact = createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -170,7 +176,7 @@ public class PolicyLibrary {
 		newProof.setProofCategory(Proof.tProofCategoryType.SURFACE_WATER_NON_PERM_ACCEPTABLE);
 		newProof.setDisplayName("Bewijs: gebied niet waterdoorlatend is acceptable voor perceel");
 
-		newProof.setPolicyReference("Artikel 13.5.a, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 14.2.a, watermanagement beleid");
 
 		newFact = createFact_PERC_NON_WATER_PERMABLE_WITHIN_NORM(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -187,7 +193,7 @@ public class PolicyLibrary {
 		if (initValue.equals(Proof.tProofClassificationType.UNDETERMINED) == false) {
 			newProof.setProofResult(initValue);
 		}
-		newProof.setPolicyReference("Artikel 12.1, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 18.2.b, bestemmingsplan");
 
 		newFact = this.createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -209,7 +215,7 @@ public class PolicyLibrary {
 		if (initValue.equals(Proof.tProofClassificationType.UNDETERMINED) == false) {
 			newProof.setProofResult(initValue);
 		}
-		newProof.setPolicyReference("Artikel 12.4, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 18.4 lid c, bestemmingsplan");
 
 		newFact = this.createFact_OBJECT_TYPE_IS_OFFICE(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -232,7 +238,7 @@ public class PolicyLibrary {
 		if (initValue.equals(Proof.tProofClassificationType.UNDETERMINED) == false) {
 			newProof.setProofResult(initValue);
 		}
-		newProof.setPolicyReference("Artikel 12.4, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 12.4, watermanagement beleid Almere");
 
 		subProof = this.createProof_SURFACE_FOUNDATION(Proof.tProofClassificationType.POSITIVE);
 		newProof.addChildProof(subProof);
@@ -256,7 +262,7 @@ public class PolicyLibrary {
 			newProof.setProofResult(initValue);
 		}
 
-		newProof.setPolicyReference("Artikel 12.5.1, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 12.5.1, bestemmingsplan");
 
 		newFact = this.createFact_OBJECT_TYPE_IS_HOUSE(Fact.tFactClassificationType.UNKNOWN);
 		newProof.addFacts(newFact);
@@ -277,7 +283,7 @@ public class PolicyLibrary {
 			newProof.setProofResult(initValue);
 		}
 		newProof.setProofResult(Proof.tProofClassificationType.NEGATIVE);
-		newProof.setPolicyReference("Artikel 12.6/1, bestemmingsplan oost");
+		newProof.setPolicyReference("Artikel 12.6.1, bestemmingsplan");
 		return newProof;
 
 	}
@@ -289,7 +295,7 @@ public class PolicyLibrary {
 		newFact = new Fact_PERC_NON_WATER_PERMABLE_WITHIN_NORM();
 		newFact.setFactType(Fact.tFactType.PERC_NON_WATER_PERMABLE_UNDER_NORM);
 		newFact.setDisplayName("Feit: Percentage niet water doorlatend gebied van perceel binnen norm");
-		newFact.setPolicyReference("Bestemmingplan 15.3 lid c");
+		newFact.setPolicyReference("Watermanagementbeleid Almere 15.3 lid c");
 
 		return newFact;
 
@@ -305,7 +311,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 		newFact.setFactResult(Fact.tFactClassificationType.TRUE);
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -320,7 +326,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -335,7 +341,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -350,7 +356,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -365,7 +371,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -381,7 +387,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -396,7 +402,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Definities, bestemmingsplan oost");
+		newFact.setPolicyReference("Definities, bestemmingsplan");
 		return newFact;
 
 	}
@@ -412,7 +418,7 @@ public class PolicyLibrary {
 			newFact.setFactResult(initValue);
 		}
 
-		newFact.setPolicyReference("Bestemmingsplan 12.2");
+		newFact.setPolicyReference("Bestemmingsplan 18.1 lid A Bestemmingsplan");
 		return newFact;
 
 	}

@@ -77,29 +77,40 @@ public class Case {
 		this.thePolicy = new ApplicablePolicy();
 
 	}
-	
+
 	public double GetNormMaxHouse() {
 		return this.thePolicy.getNorm_max_height_house();
 	}
-	
+
 	public double GetNormMaxOffice() {
 		return this.thePolicy.getNorm_max_height_office();
 	}
-	
+
 	public double GetNormPercWaterPermable() {
 		return this.thePolicy.getPerc_water_permable();
 	}
-	
-	
+
 	public boolean GetNormWorkHomeAllowed() {
 		return this.thePolicy.isWork_home_allowed();
 	}
-	
 
-	
-	public void setPolicyForZipcode(String aZipCode) {
-		this.thePolicy.setPolicyCentrum();
-		
+	public void setPolicyForZipcode() {
+		this.thePolicy.setPolicyMuziekWijkZuid();
+		if (this.thePolicy.getApplicablePolicyCode().equals(PolicyLibrary.supportedPolicies.POLICY_CENTRUM)) {
+			this.thePolicy.setPolicyCentrum();
+		} else if (this.thePolicy.getApplicablePolicyCode()
+				.equals(PolicyLibrary.supportedPolicies.POLICY_MUZIEKWIJK_ZUID)) {
+			this.thePolicy.setPolicyMuziekWijkZuid();
+		} else if (this.thePolicy.getApplicablePolicyCode()
+				.equals(PolicyLibrary.supportedPolicies.POLICY_MUZIEKWIJK_NOORD)) {
+			this.thePolicy.setPolicyMuziekWijkNoord();
+		}
+
+		else if (this.thePolicy.getApplicablePolicyCode()
+				.equals(PolicyLibrary.supportedPolicies.POLICY_STEDENWIJK_WEERWATER_NOORD)) {
+			this.thePolicy.setPolicyStedenwijkWeerwater();
+		}
+
 	}
 
 	public void initCaseByRequest(AssessRequest aRequest, ServerGlobals theServerGlobals) {
@@ -193,8 +204,9 @@ public class Case {
 		Risk horizonPolution;
 
 		Risk commercialUse;
-
-		this.setPolicyForZipcode("todo");
+		
+		this.thePolicy.DetermineApplicablePolicy(this.getContextLocation());
+		this.setPolicyForZipcode();
 		if (ServerGlobals.getInstance().scenario.equals("ALL")) {
 			riskWater = thePolicyLibrary.createRisk_WATER_PERMABILITY();
 			this.myRisks.add(riskWater);
@@ -383,10 +395,11 @@ public class Case {
 
 		else
 
-			if (theType.equals(DataPoint.DP_Type.WORK_FROM_HOME)) {
-				newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_WORK_AT_HOME(this, theServiceGlobals, theReply);
+		if (theType.equals(DataPoint.DP_Type.WORK_FROM_HOME)) {
+			newDP = theServiceGlobals.getPolicyLibrary().createDataPoint_WORK_AT_HOME(this, theServiceGlobals,
+					theReply);
 
-			}
+		}
 
 		else
 			theServiceGlobals.log("ERROR CREATING NEW DP: no creation point for type: " + theType);
@@ -647,15 +660,15 @@ public class Case {
 			aDP = anEntry.getValue();
 			isDerived = false;
 
-			if (       (aDP.getDatapointSource().equals(DataPoint.DP_source.RULE_ENGINE))
+			if ((aDP.getDatapointSource().equals(DataPoint.DP_source.RULE_ENGINE))
 					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.DESIGN_FILE))
 					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.ADMINISTRATION))
 					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.EXTERNAL_FORMAL))
 					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.EXTERNAL_INFORMAL)
-					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.FORMAL_REGISTRY))
-					|| (aDP.getDatapointSource().equals(DataPoint.DP_source.OTHER)))) {
+							|| (aDP.getDatapointSource().equals(DataPoint.DP_source.FORMAL_REGISTRY))
+							|| (aDP.getDatapointSource().equals(DataPoint.DP_source.OTHER)))) {
 				isDerived = true;
-		
+
 			}
 
 			if (isDerived) {
@@ -670,15 +683,15 @@ public class Case {
 	public void setForUser(AssessRequestReply theReply) {
 		DataPoint aDP;
 		AssessRequestContext.tUsertype theUserType;
-		
+
 		theUserType = theReply.getUserType();
-	
+
 		for (Entry<Integer, DataPoint> anEntry : allDataPointsByID.entrySet()) {
 			aDP = anEntry.getValue();
-			theUserType= theReply.getUserType();
+			theUserType = theReply.getUserType();
 			aDP.setForUser(theUserType);
 		}
-		
+
 	}
 
 }
