@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.Gson;
 
 import nl.geospatialAI.Assessment.ApplicablePolicy;
 import nl.geospatialAI.Assessment.AssessmentCriterium;
@@ -469,7 +472,7 @@ public class Case {
 			BIMfile_statusknown = true;
 			this.theBIMfile.processBIMfile(theServerGlobals, theCase);
 		}
-		theServerGlobals.log("Sending: " + BIMfile_statusknown);
+		
 		return BIMfile_statusknown;
 	}
 
@@ -693,5 +696,7 @@ public class Case {
 		}
 
 	}
+
+	
 
 }
