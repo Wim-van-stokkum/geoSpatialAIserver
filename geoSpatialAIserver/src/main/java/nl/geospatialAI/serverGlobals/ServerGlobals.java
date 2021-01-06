@@ -2,22 +2,17 @@ package nl.geospatialAI.serverGlobals;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 
 import nl.geospatialAI.Agents.CaseManager;
+import nl.geospatialAI.Agents.DemoManager;
 import nl.geospatialAI.Agents.EventObserver;
 import nl.geospatialAI.Agents.ProofManager;
 import nl.geospatialAI.Agents.RiskManager;
 import nl.geospatialAI.Agents.RiskStatusManager;
 import nl.geospatialAI.Assessment.PolicyLibrary;
 import nl.geospatialAI.Case.CasesDAO;
+import nl.geospatialAI.DataAccessHandlers.Planspace_ConfigDB;
+import nl.geospatialAI.DataAccessHandlers.Planspace_DataAccess;
 import nl.geospatialAI.MessageBrokers.InternalMessageBroker;
 
 public class ServerGlobals {
@@ -32,6 +27,7 @@ public class ServerGlobals {
 	private static ProofManager theProofManager = null;
 	private static RiskStatusManager theRiskStatusManager = null;
 	
+	private static DemoManager theDemoManager = null;
 	
 
 
@@ -41,6 +37,8 @@ public class ServerGlobals {
 
 	private t_LogLevel mylogLevel;
 	public String scenario;
+	private Planspace_DataAccess thePlanSpaceCluster;
+   private Planspace_ConfigDB thePlanSpace_ConfigDB; 
 
 	public static ServerGlobals getInstance() {
 
@@ -77,37 +75,28 @@ public class ServerGlobals {
 			stdServ.createProofManager();
 			theProofManager.listenToInternalEventsOn(theInternalMessageBroker);
 			
+			stdServ.createDemoManager();
+			theDemoManager.listenToExternalEventsOn(theInternalMessageBroker);
+			
 			stdServ.caseRegistration = CasesDAO.getInstance();
 
 	
 			stdServ.log("====================================================");
 			stdServ.log(" ");
 	
-			
-			 //Set up connection to MongoDB
-			stdServ.log(" ");
-			stdServ.log("====================================================");
-			stdServ.log("Set connection to MongoDB");
-			stdServ.log("====================================================");
-		    
-			if ( stdServ.connect("planspace_cases")) {
-					stdServ.log("Connection planspace_cases gelukt!");
-					stdServ.log("====================================================");
-					stdServ.log(" ");
-		} else
-		{
-			stdServ.log("Connection planspace_cases mislukt");
-			stdServ.log("====================================================");
-			stdServ.log(" ");
-			
-			
-			
-		
-			
+			if (stdServ.createPlanSpaceDBcluster() ) {
+				if (stdServ.openPlanSpaceConfigDB().openConfigDB()) {
+					
+				}
+			};
 
 		
-		}
-		}
+		    
+			stdServ.log("====================================================");
+			stdServ.log(" ");
+		
+		} 
+		
 		
 	
 		stdServ.scenario = "ALL";
@@ -117,46 +106,73 @@ public class ServerGlobals {
 
 	}
 
-	
-	public  boolean connect(String dbName) {
-		boolean succes;
+
+
+
+
+
+	private Planspace_ConfigDB openPlanSpaceConfigDB() {
 		
-
-		 MongoClient client;
-		 MongoDatabase database;
-		 MongoCollection riskTypeCollection;
-
-		 MongoIterable<String> theCollections;
-		 MongoCursor<String> it;
-		 ArrayList<String> collectionNames;
-
-		 MongoClientURI connectURI;
-
-		
-		connectURI = new MongoClientURI(
-				"mongodb://GeoSpatialUser:Ikga2GeoSpatialDB20@cluster0-shard-00-00.4wc3r.mongodb.net:27017,cluster0-shard-00-01.4wc3r.mongodb.net:27017,cluster0-shard-00-02.4wc3r.mongodb.net:27017/"
-						+ dbName
-						+ "?ssl=true&replicaSet=atlas-11s8w3-shard-0&authSource=admin&retryWrites=true&w=majority");
-
-		succes = false;
-
-		client = new MongoClient(connectURI);
-		if (client == null) {
-			System.out.println("Kan Mongo client niet aanmaken");
-
-		} else {
-
-			database = client.getDatabase(dbName);
-			if (database == null) {
-				System.out.println("Database " + dbName + " kon niet worden gevonden");
-			} else {
-				succes = true;
-			}
-
-		}
-		return succes;
+    	this.thePlanSpace_ConfigDB = this.thePlanSpaceCluster.getTheConfigDB();
+    	if (this.thePlanSpace_ConfigDB == null) {
+    		if( thePlanSpace_ConfigDB.openConfigDB() ) {
+     			this.log("Succes: open planspace config database");
+    		}
+    		else {
+     			this.log("ERROR cannot open planspace config database");
+    		}
+    	};
+    	return 	this.thePlanSpace_ConfigDB;
 	}
 
+
+    public Planspace_ConfigDB  getPlanSpaceConfigDB() {
+    	if (this.thePlanSpace_ConfigDB == null) {
+    	
+    		openPlanSpaceConfigDB();
+    	}
+    	return this.thePlanSpace_ConfigDB;
+    }
+
+	public boolean createPlanSpaceDBcluster() {
+    	
+    	boolean success;
+    	
+    	
+    	success = false;
+		 //Set up connection to MongoDB
+		this.log(" ");
+		this.log("====================================================");
+		this.log("Set connection to MongoDB");
+		this.log("====================================================");
+	    
+		this.thePlanSpaceCluster = new Planspace_DataAccess();
+		
+		success = this.thePlanSpaceCluster.connectCluster();
+		if (success) {
+			this.log("Connection planspace_cluster gelukt!");
+			this.log("====================================================");
+			this.log(" ");
+				
+		}
+		else{
+			this.log("ERROR: Connection planspace_cluster mislukt!");
+			this.log("====================================================");
+			this.log(" ");
+				
+		}
+			
+		return success;
+    }
+    
+    public Planspace_DataAccess getPlanSpaceDBcluster() {
+    	if (this.thePlanSpaceCluster == null) {
+    		createPlanSpaceDBcluster();
+    	}
+    	return this.thePlanSpaceCluster;
+    }
+    
+	
 	
 	private void createProofManager() {
 		theProofManager = ProofManager.getInstance();
@@ -186,6 +202,11 @@ public class ServerGlobals {
 	private void createObserver() {
 		theObserver = EventObserver.getInstance();
 		this.log("Observer created: " + theObserver.getMyID());
+	}
+	
+	private void createDemoManager() {
+		theDemoManager = DemoManager.getInstance();
+		this.log("Demo manager created: " + theDemoManager.getMyID());
 	}
 
 	private void createInternalMessageBroker() {

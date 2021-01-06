@@ -1,0 +1,38 @@
+public  boolean connect(String dbName) {
+		boolean succes;
+		
+
+		 MongoClient client;
+		 MongoDatabase database;
+		 MongoCollection riskTypeCollection;
+
+		 MongoIterable<String> theCollections;
+		 MongoCursor<String> it;
+		 ArrayList<String> collectionNames;
+
+		 MongoClientURI connectURI;
+
+		
+		connectURI = new MongoClientURI(
+				"mongodb://GeoSpatialUser:Ikga2GeoSpatialDB20@cluster0-shard-00-00.4wc3r.mongodb.net:27017,cluster0-shard-00-01.4wc3r.mongodb.net:27017,cluster0-shard-00-02.4wc3r.mongodb.net:27017/"
+						+ dbName
+						+ "?ssl=true&replicaSet=atlas-11s8w3-shard-0&authSource=admin&retryWrites=true&w=majority");
+
+		succes = false;
+
+		client = new MongoClient(connectURI);
+		if (client == null) {
+			System.out.println("Kan Mongo client niet aanmaken");
+
+		} else {
+
+			database = client.getDatabase(dbName);
+			if (database == null) {
+				System.out.println("Database " + dbName + " kon niet worden gevonden");
+			} else {
+				succes = true;
+			}
+
+		}
+		return succes;
+	}

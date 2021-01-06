@@ -14,7 +14,8 @@ public class InternalAgent {
 		RISKMANAGER,
 		RISKSTATUSMANAGER,
 		PROOFMANAGER,
-		POLICYMANAGER
+		POLICYMANAGER,
+		DEMO_MANAGER
 }
 	protected String _id;
 	protected InternalMessageBroker ObservingAt ;

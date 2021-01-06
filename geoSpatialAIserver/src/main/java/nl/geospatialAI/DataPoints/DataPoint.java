@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import nl.geospatialAI.Case.Case;
+import nl.geospatialAI.DataAccessHandlers.Planspace_ConfigDB;
 import nl.geospatialAI.Justification.JustificationDatapoint;
 import nl.geospatialAI.Justification.JustificationFact;
 import nl.geospatialAI.beans.AssessRequestContext;
@@ -56,7 +58,7 @@ public class DataPoint {
 	}
 
 	public enum DP_maskType {
-		IBAN, MOBILEPHONE_NL, CHAMBREOFCOMMERCE_DOSSIERNUMBER, ZIPCODENL, EMAILADDRESS, dateDDMMJJJ, NONE
+		IBAN, MOBILEPHONE_NL, CHAMBREOFCOMMERCE_DOSSIERNUMBER, ZIPCODENL, EMAILADDRESS, dateDDMMJJJ,  NO_MASK
 
 		// to de defined or extented in pilot
 	}
@@ -104,10 +106,14 @@ public class DataPoint {
 	String explanationText;
 	String value = "";
 	String defaultValue = "";
+	
+
+
 	int maxValueInteger;
 	int minValueInteger;
 	float minValueNumber;
 	float maxValueNumber;
+	String description;
 	List<String> values;
 	List<AllowedValue> allowedValueList;
 	protected List<DataPoint> usedDataPoints;
@@ -147,6 +153,15 @@ public class DataPoint {
 		return isAskable;
 	}
 
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public void setAskable(boolean isAskable) {
 		this.isAskable = isAskable;
 
@@ -167,9 +182,11 @@ public class DataPoint {
 	public void setDataType(DP_dataType dataType) {
 		this.dataType = dataType;
 	}
-
+	
+//	@JsonGetter("maxValueInteger")
 	public int getMaxValueInteger() {
-		return maxValueInteger;
+	
+	  return maxValueInteger;
 	}
 
 	public void setMaxValueInteger(int maxValueInteger) {
@@ -470,6 +487,24 @@ public class DataPoint {
 	// ====================================================================================
 	// ====================================================================================
 
+	private void initDataPoint_BIMFILEURL_ByDB() {
+		
+		
+		DataPoint newDP;
+		DataPointType theDPType;
+		
+		Planspace_ConfigDB theConfigDB = null;
+
+		newDP = this;
+		
+		
+		theConfigDB = ServerGlobals.getInstance().getPlanSpaceConfigDB();
+		theDPType = theConfigDB.getDataPointTypeConfig_ByTypeName(DataPoint.DP_Type.BIMFILEURL.toString());
+		ServerGlobals.getInstance().log("GETTING DATAPOINTTYPE : " +theDPType.typeName + " of category : " + theDPType.dataPointCategory +  "  no allowedvalues " + theDPType.allowedValueList.size() );
+		theDPType.initializeDataPoint(newDP);
+		//initDataPoint_BIMFILEURL() ;
+	}
+	
 	private void initDataPoint_BIMFILEURL() {
 
 		DataPoint newDP;
@@ -563,7 +598,7 @@ public class DataPoint {
 	public void setForUser(AssessRequestContext.tUsertype usertype) {
 		if (usertype.equals(AssessRequestContext.tUsertype.BEOORDELAAR)) {
 
-			this.setDefaultValue(this.questionTextPerRole.get("BEOORDELAAR"));
+			this.setQuestionText(this.questionTextPerRole.get("BEOORDELAAR"));
 			this.setExplanationText(this.explainTextPerRole.get("BEOORDELAAR"));
 
 		} else {
@@ -1111,7 +1146,7 @@ public class DataPoint {
 
 	public void initDataPoint(DataPoint.DP_Type aDPtype) {
 		if (aDPtype.equals(DataPoint.DP_Type.BIMFILEURL)) {
-			this.initDataPoint_BIMFILEURL();
+			this.initDataPoint_BIMFILEURL_ByDB();
 		} else if (aDPtype.equals(DataPoint.DP_Type.PURPOSE_HM_OBJECT)) {
 			this.initDataPoint_PURPOSE_HM_OBJECT();
 		} else if (aDPtype.equals(DataPoint.DP_Type.BUILDINGCATEGORY)) {

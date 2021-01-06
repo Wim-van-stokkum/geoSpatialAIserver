@@ -6,13 +6,16 @@ public class ExternalEvent extends AbstractEvent {
 	
 
 	public enum t_externalEventTypeCategory {
-			BusinessServiceEventType
+			BusinessServiceEventType,
+			ConfigurationEventType
 	}
  
 	public enum t_externalEventType {
 		EnvironmentalMutation_NewMainBuilding,
 		EnvironmentalMutation_NewAdditionalBuilding,
-		Release_NewPolicyForContext
+		Release_NewPolicyForContext,
+		New_Demo_DataPointTypes
+		
 	}
 	
 	
