@@ -489,7 +489,7 @@ public class DataPoint {
 
 	private void initDataPoint_BIMFILEURL_ByDB() {
 		
-		
+	/*	
 		DataPoint newDP;
 		DataPointType theDPType;
 		
@@ -503,6 +503,10 @@ public class DataPoint {
 		ServerGlobals.getInstance().log("GETTING DATAPOINTTYPE : " +theDPType.typeName + " of category : " + theDPType.dataPointCategory +  "  no allowedvalues " + theDPType.allowedValueList.size() );
 		theDPType.initializeDataPoint(newDP);
 		//initDataPoint_BIMFILEURL() ;
+		 * 
+		 * */
+		initDataPoint_BIMFILEURL();
+		
 	}
 	
 	private void initDataPoint_BIMFILEURL() {

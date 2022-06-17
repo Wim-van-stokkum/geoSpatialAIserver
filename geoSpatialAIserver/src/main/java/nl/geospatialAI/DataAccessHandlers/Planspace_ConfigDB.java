@@ -11,6 +11,9 @@ public class Planspace_ConfigDB {
 	private MongoDatabase planspace_ConfigDatabase = null;
 	private String planspace_ConfigDBname = "planspace_config";
 
+
+	
+	
 	// collections
 
 	private Planspace_Datapoint_ConfigDB theDataPointTypeConfiguration;
